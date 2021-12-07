@@ -1,6 +1,6 @@
 fn pt1(input: &str) -> anyhow::Result<isize> {
 	let mut nums: Vec<isize> = input.split(',').map(|c| c.parse().unwrap()).collect();
-	nums.sort();
+	nums.sort_unstable();
 
 	let mid = nums.len() / 2;
 	let mut minimum = isize::MAX;
