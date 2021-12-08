@@ -21,15 +21,49 @@ fn pt2(input: &str) -> anyhow::Result<isize> {
 		.map(|line| {
 			let (uniques, input) = line.split(" | ").collect_tuple().unwrap();
 
-			let key = ('a'..='g')
-				.permutations(7)
-				.map(|key| key.iter().join(""))
-				.find(|key| {
-					uniques
-						.split(' ')
-						.all(|digit| get_digit(digit, key).is_some())
-				})
+			let one = uniques.split(" ").find(|word| word.len() == 2).unwrap();
+			let seven = uniques.split(" ").find(|word| word.len() == 3).unwrap();
+			let four = uniques.split(" ").find(|word| word.len() == 4).unwrap();
+			let eight = uniques.split(" ").find(|word| word.len() == 7).unwrap();
+			let six = uniques
+				.split(" ")
+				.filter(|word| word.len() == 6)
+				.find(|word| word.chars().filter(|&c| !seven.contains(c)).count() == 4)
 				.unwrap();
+			let three = uniques
+				.split(" ")
+				.filter(|word| word.len() == 5)
+				.find(|word| word.chars().filter(|&c| !seven.contains(c)).count() == 2)
+				.unwrap();
+
+			let top = seven.chars().filter(|&c| !one.contains(c)).next().unwrap();
+			let top_left = four.chars().filter(|&c| !three.contains(c)).next().unwrap();
+			let top_right = eight.chars().filter(|&c| !six.contains(c)).next().unwrap();
+			let bottom_right = one.chars().filter(|&c| c != top_right).next().unwrap();
+			let bottom = three
+				.chars()
+				.filter(|&c| !four.contains(c) && c != top)
+				.next()
+				.unwrap();
+			let middle = four
+				.chars()
+				.filter(|&c| c != top_left && c != top_right && c != bottom_right)
+				.next()
+				.unwrap();
+			let bottom_left = ('a'..='g')
+				.filter(|&c| {
+					c != top
+						&& c != top_left && c != top_right
+						&& c != middle && c != bottom_right
+						&& c != bottom
+				})
+				.next()
+				.unwrap();
+
+			let key = format!(
+				"{}{}{}{}{}{}{}",
+				top, top_left, top_right, middle, bottom_left, bottom_right, bottom
+			);
 
 			input
 				.split(' ')
