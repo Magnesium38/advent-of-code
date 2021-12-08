@@ -21,43 +21,40 @@ fn pt2(input: &str) -> anyhow::Result<isize> {
 		.map(|line| {
 			let (uniques, input) = line.split(" | ").collect_tuple().unwrap();
 
-			let one = uniques.split(" ").find(|word| word.len() == 2).unwrap();
-			let seven = uniques.split(" ").find(|word| word.len() == 3).unwrap();
-			let four = uniques.split(" ").find(|word| word.len() == 4).unwrap();
-			let eight = uniques.split(" ").find(|word| word.len() == 7).unwrap();
+			let one = uniques.split(' ').find(|word| word.len() == 2).unwrap();
+			let seven = uniques.split(' ').find(|word| word.len() == 3).unwrap();
+			let four = uniques.split(' ').find(|word| word.len() == 4).unwrap();
+			let eight = uniques.split(' ').find(|word| word.len() == 7).unwrap();
 			let six = uniques
-				.split(" ")
+				.split(' ')
 				.filter(|word| word.len() == 6)
 				.find(|word| word.chars().filter(|&c| !seven.contains(c)).count() == 4)
 				.unwrap();
 			let three = uniques
-				.split(" ")
+				.split(' ')
 				.filter(|word| word.len() == 5)
 				.find(|word| word.chars().filter(|&c| !seven.contains(c)).count() == 2)
 				.unwrap();
 
-			let top = seven.chars().filter(|&c| !one.contains(c)).next().unwrap();
-			let top_left = four.chars().filter(|&c| !three.contains(c)).next().unwrap();
-			let top_right = eight.chars().filter(|&c| !six.contains(c)).next().unwrap();
-			let bottom_right = one.chars().filter(|&c| c != top_right).next().unwrap();
+			let top = seven.chars().find(|&c| !one.contains(c)).unwrap();
+			let top_left = four.chars().find(|&c| !three.contains(c)).unwrap();
+			let top_right = eight.chars().find(|&c| !six.contains(c)).unwrap();
+			let bottom_right = one.chars().find(|&c| c != top_right).unwrap();
 			let bottom = three
 				.chars()
-				.filter(|&c| !four.contains(c) && c != top)
-				.next()
+				.find(|&c| !four.contains(c) && c != top)
 				.unwrap();
 			let middle = four
 				.chars()
-				.filter(|&c| c != top_left && c != top_right && c != bottom_right)
-				.next()
+				.find(|&c| c != top_left && c != top_right && c != bottom_right)
 				.unwrap();
 			let bottom_left = ('a'..='g')
-				.filter(|&c| {
+				.find(|&c| {
 					c != top
 						&& c != top_left && c != top_right
 						&& c != middle && c != bottom_right
 						&& c != bottom
 				})
-				.next()
 				.unwrap();
 
 			let key = format!(
