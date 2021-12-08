@@ -22,143 +22,30 @@ fn pt2(input: &str) -> anyhow::Result<isize> {
 			let (uniques, input) = line.split(" | ").collect_tuple().unwrap();
 
 			let one = uniques.split(' ').find(|word| word.len() == 2).unwrap();
-			let seven = uniques.split(' ').find(|word| word.len() == 3).unwrap();
 			let four = uniques.split(' ').find(|word| word.len() == 4).unwrap();
-			let eight = uniques.split(' ').find(|word| word.len() == 7).unwrap();
-			let six = uniques
-				.split(' ')
-				.filter(|word| word.len() == 6)
-				.find(|word| word.chars().filter(|&c| !seven.contains(c)).count() == 4)
-				.unwrap();
-			let three = uniques
-				.split(' ')
-				.filter(|word| word.len() == 5)
-				.find(|word| word.chars().filter(|&c| !seven.contains(c)).count() == 2)
-				.unwrap();
 
-			let top = seven.chars().find(|&c| !one.contains(c)).unwrap();
-			let top_left = four.chars().find(|&c| !three.contains(c)).unwrap();
-			let top_right = eight.chars().find(|&c| !six.contains(c)).unwrap();
-			let bottom_right = one.chars().find(|&c| c != top_right).unwrap();
-			let bottom = three
-				.chars()
-				.find(|&c| !four.contains(c) && c != top)
-				.unwrap();
-			let middle = four
-				.chars()
-				.find(|&c| c != top_left && c != top_right && c != bottom_right)
-				.unwrap();
-			let bottom_left = ('a'..='g')
-				.find(|&c| {
-					c != top
-						&& c != top_left && c != top_right
-						&& c != middle && c != bottom_right
-						&& c != bottom
-				})
-				.unwrap();
-
-			let key = format!(
-				"{}{}{}{}{}{}{}",
-				top, top_left, top_right, middle, bottom_left, bottom_right, bottom
-			);
-
-			input
-				.split(' ')
-				.map(|digit| get_digit(digit, &key))
-				.fold_options(0, |total, digit| (total * 10) + digit)
-				.unwrap()
+			input.split(' ').fold(0, |total, word| {
+				(total * 10)
+					+ match (
+						word.len(),
+						word.chars().filter(|&c| !one.contains(c)).count(),
+						word.chars().filter(|&c| !four.contains(c)).count(),
+					) {
+						(6, 4, 3) => 0,
+						(2, _, _) => 1,
+						(5, 4, 3) => 2,
+						(5, 3, 2) => 3,
+						(4, _, _) => 4,
+						(5, 4, 2) => 5,
+						(6, 5, 3) => 6,
+						(3, _, _) => 7,
+						(7, _, _) => 8,
+						(6, 4, 2) => 9,
+						(_, _, _) => unreachable!(),
+					}
+			})
 		})
 		.sum())
-}
-
-fn get_digit(digit: &str, key: &str) -> Option<isize> {
-	let (top, top_left, top_right, middle, bottom_left, bottom_right, bottom) =
-		key.chars().collect_tuple().unwrap();
-
-	match digit.len() {
-		2 => {
-			if digit.contains(top_right) && digit.contains(bottom_right) {
-				Some(1)
-			} else {
-				None
-			}
-		}
-		3 => {
-			if digit.contains(top) && digit.contains(top_right) && digit.contains(bottom_right) {
-				Some(7)
-			} else {
-				None
-			}
-		}
-		4 => {
-			if digit.contains(top_left)
-				&& digit.contains(top_right)
-				&& digit.contains(middle)
-				&& digit.contains(bottom_right)
-			{
-				Some(4)
-			} else {
-				None
-			}
-		}
-		7 => Some(8),
-		5 => {
-			if digit.contains(top)
-				&& digit.contains(top_right)
-				&& digit.contains(middle)
-				&& digit.contains(bottom_left)
-				&& digit.contains(bottom)
-			{
-				Some(2)
-			} else if digit.contains(top)
-				&& digit.contains(top_right)
-				&& digit.contains(middle)
-				&& digit.contains(bottom_right)
-				&& digit.contains(bottom)
-			{
-				Some(3)
-			} else if digit.contains(top)
-				&& digit.contains(top_left)
-				&& digit.contains(middle)
-				&& digit.contains(bottom_right)
-				&& digit.contains(bottom)
-			{
-				Some(5)
-			} else {
-				None
-			}
-		}
-		6 => {
-			if digit.contains(top)
-				&& digit.contains(top_left)
-				&& digit.contains(top_right)
-				&& digit.contains(bottom_left)
-				&& digit.contains(bottom_right)
-				&& digit.contains(bottom)
-			{
-				Some(0)
-			} else if digit.contains(top)
-				&& digit.contains(top_left)
-				&& digit.contains(middle)
-				&& digit.contains(bottom_left)
-				&& digit.contains(bottom_right)
-				&& digit.contains(bottom)
-			{
-				Some(6)
-			} else if digit.contains(top)
-				&& digit.contains(top_left)
-				&& digit.contains(top_right)
-				&& digit.contains(middle)
-				&& digit.contains(bottom_right)
-				&& digit.contains(bottom)
-			{
-				Some(9)
-			} else {
-				None
-			}
-		}
-		_ => None,
-	}
 }
 
 advent::problem!(
