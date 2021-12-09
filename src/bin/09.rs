@@ -100,7 +100,7 @@ fn pt2(input: &str) -> anyhow::Result<isize> {
 			];
 			visited.insert((x, y), true);
 
-			while to_visit.len() > 0 {
+			while !to_visit.is_empty() {
 				let (x, y, low_point) = to_visit.pop().unwrap();
 				let has_visited = visited.entry((x, y)).or_insert(false);
 
