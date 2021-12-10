@@ -1,5 +1,7 @@
+use itertools::Itertools;
+
 fn pt1(input: &str) -> anyhow::Result<isize> {
-	let result = input
+	Ok(input
 		.lines()
 		.map(|line| {
 			let mut last_length = 0;
@@ -26,13 +28,11 @@ fn pt1(input: &str) -> anyhow::Result<isize> {
 
 			0
 		})
-		.collect::<Vec<_>>();
-
-	Ok(result.iter().sum::<isize>())
+		.sum())
 }
 
 fn pt2(input: &str) -> anyhow::Result<isize> {
-	let mut scores = input
+	let scores = input
 		.lines()
 		.map(|line| {
 			let mut last_length = 0;
@@ -54,30 +54,21 @@ fn pt2(input: &str) -> anyhow::Result<isize> {
 				}
 			}
 
-			line = line
-				.chars()
-				.rev()
-				.collect::<String>()
-				.replace('(', ")")
-				.replace('[', "]")
-				.replace('{', "}")
-				.replace('<', ">");
-
-			line.chars().fold(0, |acc, c| {
+			line.chars().rev().fold(0, |acc, c| {
 				(acc * 5)
 					+ match c {
-						')' => 1,
-						']' => 2,
-						'}' => 3,
-						'>' => 4,
+						'(' => 1,
+						'[' => 2,
+						'{' => 3,
+						'<' => 4,
 						_ => 0,
 					}
 			})
 		})
 		.filter(|&score| score > 0)
+		.sorted()
 		.collect::<Vec<_>>();
 
-	scores.sort_unstable();
 	let len = scores.len();
 
 	Ok(scores[len / 2])
