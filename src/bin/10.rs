@@ -4,29 +4,33 @@ fn pt1(input: &str) -> anyhow::Result<isize> {
 	Ok(input
 		.lines()
 		.map(|line| {
-			let mut last_length = 0;
-			let mut line = line.to_string();
+			let mut stack = Vec::new();
 
-			while line.len() != last_length {
-				last_length = line.len();
-				line = line
-					.replace("()", "")
-					.replace("[]", "")
-					.replace("{}", "")
-					.replace("<>", "");
-			}
+			line.chars()
+				.find_map(|c| match c {
+					'(' | '[' | '{' | '<' => {
+						stack.push(c);
+						None
+					}
 
-			for c in line.chars() {
-				match c {
-					')' => return 3,
-					']' => return 57,
-					'}' => return 1197,
-					'>' => return 25137,
-					_ => continue,
-				}
-			}
+					_ => match (stack.pop(), c) {
+						(Some('('), ')')
+						| (Some('['), ']')
+						| (Some('{'), '}')
+						| (Some('<'), '>') => None,
 
-			0
+						(Some(_), _) => match c {
+							')' => return Some(3),
+							']' => return Some(57),
+							'}' => return Some(1197),
+							'>' => return Some(25137),
+							_ => unreachable!(),
+						},
+
+						(None, _) => unreachable!(),
+					},
+				})
+				.unwrap_or(0)
 		})
 		.sum())
 }
@@ -35,26 +39,34 @@ fn pt2(input: &str) -> anyhow::Result<isize> {
 	let scores = input
 		.lines()
 		.map(|line| {
-			let mut last_length = 0;
-			let mut line = line.to_string();
+			let mut stack = Vec::new();
 
-			while line.len() != last_length {
-				last_length = line.len();
-				line = line
-					.replace("()", "")
-					.replace("[]", "")
-					.replace("{}", "")
-					.replace("<>", "");
-			}
-
-			for c in line.chars() {
-				match c {
-					')' | ']' | '}' | '>' => return 0,
-					_ => continue,
+			let is_corrupted = line.chars().find_map(|c| match c {
+				'(' | '[' | '{' | '<' => {
+					stack.push(c);
+					None
 				}
+
+				_ => match (stack.pop(), c) {
+					(Some('('), ')') | (Some('['), ']') | (Some('{'), '}') | (Some('<'), '>') => {
+						None
+					}
+
+					(Some(_), _) => match c {
+						')' | ']' | '}' | '>' => return Some(true),
+						_ => unreachable!(),
+					},
+
+					(None, _) => unreachable!(),
+				},
+			});
+
+			if let Some(true) = is_corrupted {
+				return 0;
 			}
 
-			line.chars().rev().fold(0, |acc, c| {
+			stack.reverse();
+			stack.iter().fold(0, |acc, c| {
 				(acc * 5)
 					+ match c {
 						'(' => 1,
@@ -69,9 +81,7 @@ fn pt2(input: &str) -> anyhow::Result<isize> {
 		.sorted()
 		.collect::<Vec<_>>();
 
-	let len = scores.len();
-
-	Ok(scores[len / 2])
+	Ok(scores[scores.len() / 2])
 }
 
 advent::problem!(
