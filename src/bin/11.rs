@@ -6,10 +6,13 @@ fn pt1(input: &str) -> anyhow::Result<isize> {
 		.ok_or(anyhow::anyhow!("no output"))
 }
 
-fn pt2(input: &str) -> anyhow::Result<isize> {
-	let r = World::new(input).enumerate().find(|(_, (_, a))| *a == 100);
+fn pt2(input: &str) -> anyhow::Result<usize> {
+	let (generation, _) = World::new(input)
+		.enumerate()
+		.find(|(_, (_, a))| *a == 100)
+		.ok_or(anyhow::anyhow!("no output"))?;
 
-	Ok((r.unwrap().0 + 1).try_into().unwrap())
+	Ok(generation + 1)
 }
 
 struct World {
@@ -20,8 +23,11 @@ struct World {
 impl World {
 	fn new(input: &str) -> Self {
 		Self {
-			grid: advent::Grid::new(input).map(|c| Some(c)),
 			count: 0,
+			grid: input
+				.lines()
+				.map(|line| line.chars().map(|c| c.to_digit(10).map(Some).unwrap()))
+				.into(),
 		}
 	}
 }

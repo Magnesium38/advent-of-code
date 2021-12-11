@@ -29,6 +29,28 @@ impl Grid<u32> {
 	}
 }
 
+impl<I, I2, T> From<I> for Grid<T>
+where
+	I: Iterator<Item = I2>,
+	I2: Iterator<Item = T>,
+{
+	fn from(iter: I) -> Self {
+		let mut height = 0;
+		let cells = iter.fold(Vec::new(), |mut vec, line| {
+			height += 1;
+			vec.extend(line);
+
+			vec
+		});
+
+		Grid {
+			width: cells.len() / height,
+			height,
+			cells,
+		}
+	}
+}
+
 impl<T> Grid<T> {
 	fn index(&self, x: isize, y: isize) -> Option<usize> {
 		if x < 0 || y < 0 || x >= self.width as isize || y >= self.height as isize {
@@ -284,5 +306,17 @@ mod tests {
 		grid.iter_mut().for_each(|(_, cell)| *cell += 1);
 
 		assert_eq!(grid.cells, vec![2, 3, 4, 5]);
+	}
+
+	#[test]
+	fn a_grid_can_be_created_from_iterators() {
+		let grid: Grid<_> = "123\n456\n789\n"
+			.lines()
+			.map(|line| line.chars().map(|c| c.to_digit(10).unwrap()))
+			.into();
+
+		assert_eq!(grid.width, 3);
+		assert_eq!(grid.height, 3);
+		assert_eq!(grid.cells, vec![1, 2, 3, 4, 5, 6, 7, 8, 9]);
 	}
 }
