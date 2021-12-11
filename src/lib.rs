@@ -1,4 +1,6 @@
-pub mod grid;
+mod grid;
+
+pub use grid::{Grid, Neighbors, Iter};
 
 #[macro_export]
 macro_rules! main {
@@ -6,7 +8,7 @@ macro_rules! main {
 		fn main() -> anyhow::Result<()> {
 			let mut filepath = std::env::current_dir()?;
 			filepath.push(file!().replace(".rs", ".txt").replace("src/bin/", "input/"));
-		
+
 			let input = std::fs::read_to_string(filepath)?;
 			let input = input.trim();
 			let now = std::time::Instant::now();
@@ -15,7 +17,7 @@ macro_rules! main {
 			let pt2 = pt2(input);
 
 			let elapsed = now.elapsed();
-            
+
 			println!("Part one: {}", pt1?);
 			println!("Part two: {}", pt2?);
 			println!("Duration: {}µs", elapsed.as_micros());

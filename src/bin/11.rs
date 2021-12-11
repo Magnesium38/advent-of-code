@@ -1,15 +1,5 @@
-use std::collections::HashMap;
-
 fn pt1(input: &str) -> anyhow::Result<isize> {
-	let mut map: HashMap<(isize, isize), Option<u32>> = HashMap::new();
-
-	input.lines().enumerate().for_each(|(i, line)| {
-		line.chars().enumerate().for_each(|(j, c)| {
-			map.insert((i as isize, j as isize), Some(c.to_digit(10).unwrap()));
-		});
-	});
-
-	World::new(map)
+	World::new(input)
 		.take(100)
 		.map(|(i, _)| i)
 		.last()
@@ -17,27 +7,22 @@ fn pt1(input: &str) -> anyhow::Result<isize> {
 }
 
 fn pt2(input: &str) -> anyhow::Result<isize> {
-	let mut map: HashMap<(isize, isize), Option<u32>> = HashMap::new();
-
-	input.lines().enumerate().for_each(|(i, line)| {
-		line.chars().enumerate().for_each(|(j, c)| {
-			map.insert((i as isize, j as isize), Some(c.to_digit(10).unwrap()));
-		});
-	});
-
-	let r = World::new(map).enumerate().find(|(_, (_, a))| *a == 100);
+	let r = World::new(input).enumerate().find(|(_, (_, a))| *a == 100);
 
 	Ok((r.unwrap().0 + 1).try_into().unwrap())
 }
 
 struct World {
-	map: HashMap<(isize, isize), Option<u32>>,
+	grid: advent::Grid<Option<u32>>,
 	count: isize,
 }
 
 impl World {
-	fn new(map: HashMap<(isize, isize), Option<u32>>) -> Self {
-		Self { map, count: 0 }
+	fn new(input: &str) -> Self {
+		Self {
+			grid: advent::Grid::new(input).map(|c| Some(c)),
+			count: 0,
+		}
 	}
 }
 
@@ -45,7 +30,7 @@ impl Iterator for World {
 	type Item = (isize, usize);
 
 	fn next(&mut self) -> Option<Self::Item> {
-		self.map.iter_mut().for_each(|(_, v)| {
+		self.grid.iter_mut().for_each(|(_, v)| {
 			if let Some(v) = v {
 				*v += 1;
 			}
@@ -54,14 +39,14 @@ impl Iterator for World {
 		let mut x = 0;
 
 		while self
-			.map
+			.grid
 			.iter()
 			.any(|(_, v)| if let Some(v) = v { *v > 9 } else { false })
 		{
 			let mut to_increment = Vec::new();
 			let mut to_none = Vec::new();
 
-			self.map.iter().for_each(|(&(x, y), v)| {
+			self.grid.iter().for_each(|((x, y), v)| {
 				if let Some(v) = v {
 					if *v > 9 {
 						for i in -1..=1 {
@@ -76,19 +61,21 @@ impl Iterator for World {
 			});
 
 			x += to_none.len();
-			to_none.iter().for_each(|(x, y)| {
+			to_none.iter().for_each(|&(x, y)| {
 				self.count += 1;
-				self.map.insert((*x, *y), None);
+				if let Some(v) = self.grid.get_mut(x, y) {
+					*v = None;
+				}
 			});
 
-			to_increment.iter().for_each(|(x, y)| {
-				if let Some(Some(v)) = self.map.get_mut(&(*x, *y)) {
+			to_increment.iter().for_each(|&(x, y)| {
+				if let Some(Some(v)) = self.grid.get_mut(x, y) {
 					*v += 1;
 				}
 			});
 		}
 
-		self.map.iter_mut().for_each(|(_, v)| {
+		self.grid.iter_mut().for_each(|(_, v)| {
 			if v.is_none() {
 				*v = Some(0);
 			}

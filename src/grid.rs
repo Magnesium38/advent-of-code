@@ -64,6 +64,24 @@ impl<T> Grid<T> {
 			dy: -1,
 		}
 	}
+
+	pub fn iter(&self) -> Iter<T> {
+		Iter {
+			cells: self.cells.iter(),
+			x: 0,
+			y: 0,
+			width: self.width,
+		}
+	}
+
+	pub fn iter_mut(&mut self) -> IterMut<T> {
+		IterMut {
+			cells: self.cells.iter_mut(),
+			x: 0,
+			y: 0,
+			width: self.width,
+		}
+	}
 }
 
 impl<T1> Grid<T1> {
@@ -109,6 +127,56 @@ impl<'a, T> Iterator for Neighbors<'a, T> {
 		}
 
 		next
+	}
+}
+
+pub struct Iter<'a, T> {
+	cells: std::slice::Iter<'a, T>,
+	x: usize,
+	y: usize,
+	width: usize,
+}
+
+impl<'a, T> Iterator for Iter<'a, T> {
+	type Item = ((isize, isize), &'a T);
+
+	fn next(&mut self) -> Option<Self::Item> {
+		let x = self.x.try_into().unwrap();
+		let y = self.y.try_into().unwrap();
+
+		self.x += 1;
+
+		if self.x >= self.width {
+			self.x = 0;
+			self.y += 1;
+		}
+
+		self.cells.next().map(|cell| ((x, y), cell))
+	}
+}
+
+pub struct IterMut<'a, T> {
+	cells: std::slice::IterMut<'a, T>,
+	x: usize,
+	y: usize,
+	width: usize,
+}
+
+impl<'a, T> Iterator for IterMut<'a, T> {
+	type Item = ((isize, isize), &'a mut T);
+
+	fn next(&mut self) -> Option<Self::Item> {
+		let x = self.x.try_into().unwrap();
+		let y = self.y.try_into().unwrap();
+
+		self.x += 1;
+
+		if self.x >= self.width {
+			self.x = 0;
+			self.y += 1;
+		}
+
+		self.cells.next().map(|cell| ((x, y), cell))
 	}
 }
 
@@ -194,5 +262,27 @@ mod tests {
 		assert_eq!(neighbors.next(), Some(&3));
 		assert_eq!(neighbors.next(), Some(&4));
 		assert_eq!(neighbors.next(), None);
+	}
+
+	#[test]
+	fn a_grid_can_be_iterated() {
+		let grid = Grid::new("12\n34\n");
+
+		let mut iterator = grid.iter();
+
+		assert_eq!(iterator.next(), Some(((0, 0), &1)));
+		assert_eq!(iterator.next(), Some(((1, 0), &2)));
+		assert_eq!(iterator.next(), Some(((0, 1), &3)));
+		assert_eq!(iterator.next(), Some(((1, 1), &4)));
+		assert_eq!(iterator.next(), None);
+	}
+
+	#[test]
+	fn a_grid_can_be_iterated_mutably() {
+		let mut grid = Grid::new("12\n34\n");
+
+		grid.iter_mut().for_each(|(_, cell)| *cell += 1);
+
+		assert_eq!(grid.cells, vec![2, 3, 4, 5]);
 	}
 }
