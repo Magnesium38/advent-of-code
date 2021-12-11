@@ -1,10 +1,6 @@
 use std::collections::HashMap;
 
-use itertools::Itertools;
-
 fn pt1(input: &str) -> anyhow::Result<isize> {
-	dbg!(&input);
-
 	let mut map: HashMap<(isize, isize), Option<u32>> = HashMap::new();
 
 	input.lines().enumerate().for_each(|(i, line)| {
@@ -21,8 +17,6 @@ fn pt1(input: &str) -> anyhow::Result<isize> {
 }
 
 fn pt2(input: &str) -> anyhow::Result<isize> {
-	dbg!(&input);
-
 	let mut map: HashMap<(isize, isize), Option<u32>> = HashMap::new();
 
 	input.lines().enumerate().for_each(|(i, line)| {
@@ -31,9 +25,7 @@ fn pt2(input: &str) -> anyhow::Result<isize> {
 		});
 	});
 
-	let r = World::new(map)
-		.enumerate()
-		.find(|(_, (_, a))| *a == 100);
+	let r = World::new(map).enumerate().find(|(_, (_, a))| *a == 100);
 
 	Ok((r.unwrap().0 + 1).try_into().unwrap())
 }
@@ -64,8 +56,7 @@ impl Iterator for World {
 		while self
 			.map
 			.iter()
-			.find(|(_, v)| if let Some(v) = v { *v > 9 } else { false })
-			.is_some()
+			.any(|(_, v)| if let Some(v) = v { *v > 9 } else { false })
 		{
 			let mut to_increment = Vec::new();
 			let mut to_none = Vec::new();
@@ -91,16 +82,14 @@ impl Iterator for World {
 			});
 
 			to_increment.iter().for_each(|(x, y)| {
-				if let Some(v) = self.map.get_mut(&(*x, *y)) {
-					if let Some(v) = v {
-						*v += 1;
-					}
+				if let Some(Some(v)) = self.map.get_mut(&(*x, *y)) {
+					*v += 1;
 				}
 			});
 		}
 
 		self.map.iter_mut().for_each(|(_, v)| {
-			if let None = v {
+			if v.is_none() {
 				*v = Some(0);
 			}
 		});
