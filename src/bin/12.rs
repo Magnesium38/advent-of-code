@@ -12,7 +12,7 @@ fn pt1(input: &str) -> anyhow::Result<usize> {
 			return 1;
 		}
 
-		let is_lowercase = starting_point.s.chars().all(|c| c.is_ascii_lowercase());
+		let is_lowercase = starting_point.lowercase;
 		if visited.contains(starting_point.s) && is_lowercase {
 			return 0;
 		}
@@ -42,7 +42,7 @@ fn pt2(input: &str) -> anyhow::Result<usize> {
 			return 1;
 		}
 
-		let is_lowercase = starting_point.s.chars().all(|c| c.is_ascii_lowercase());
+		let is_lowercase = starting_point.lowercase;
 		if is_lowercase && has_double_visited && visited.contains(starting_point.s) {
 			return 0;
 		}
@@ -83,10 +83,13 @@ fn build_graph(input: &str) -> HashMap<&str, Vec<Cave>> {
 				.push(Cave::from(start));
 		}
 
-		mapping
-			.entry(start)
-			.or_insert_with(Vec::new)
-			.push(Cave::from(end));
+
+		if end != "start" && start != "end" {
+			mapping
+				.entry(start)
+				.or_insert_with(Vec::new)
+				.push(Cave::from(end));
+		}
 	});
 
 	mapping
@@ -108,14 +111,17 @@ impl<'a> Cave<'a> {
 
 advent::problem!(
 	r#"
-		start-A
-		start-b
-		A-c
-		A-b
-		b-d
-		A-end
-		b-end
+		dc-end
+		HN-start
+		start-kj
+		dc-start
+		dc-HN
+		LN-dc
+		HN-end
+		kj-sa
+		kj-HN
+		kj-dc
 	"#,
-	10,
-	36,
+	19,
+	103,
 );
