@@ -96,13 +96,13 @@ fn pt2(input: &str) -> anyhow::Result<usize> {
 				let mut new_path = path.clone();
 				new_path.push_str(format!(",{}", end).as_str());
 
-				let can_visit_only_once = end.chars().next().unwrap().is_ascii_lowercase();
-				if visited.contains(end) && can_visit_only_once && has_double_visited {
-					return;
-				}
+				let mut visited = visited.clone();
+				if end.chars().next().unwrap().is_ascii_lowercase() {
+					if visited.contains(end) {
+						if has_double_visited {
+							return;
+						}
 
-				if can_visit_only_once && visited.contains(end) {
-					if !has_double_visited {
 						let mut visited = visited.clone();
 						visited.insert(end);
 						paths.extend(find_paths(
@@ -112,13 +112,12 @@ fn pt2(input: &str) -> anyhow::Result<usize> {
 							visited,
 							true,
 						));
+						return;
 					}
 
-					return;
+					visited.insert(end);
 				}
 
-				let mut visited = visited.clone();
-				visited.insert(end);
 				paths.extend(find_paths(
 					end,
 					mapping.clone(),
