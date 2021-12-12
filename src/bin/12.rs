@@ -24,15 +24,17 @@ fn pt1(input: &str) -> anyhow::Result<usize> {
 					return;
 				}
 
-				let mut new_path = path.clone();
-				new_path.push_str(format!(",{}", end).as_str());
-
-				if visited.contains(end) && end.chars().next().unwrap().is_ascii_lowercase() {
+				if visited.contains(end) {
 					return;
 				}
 
+				let mut new_path = path.clone();
+				new_path.push_str(format!(",{}", end).as_str());
+
 				let mut visited = visited.clone();
-				visited.insert(end);
+				if end.chars().next().unwrap().is_ascii_lowercase() {
+					visited.insert(end);
+				}
 
 				paths.extend(find_paths(end, mapping.clone(), new_path, visited));
 			});
