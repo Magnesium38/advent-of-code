@@ -5,7 +5,7 @@ fn pt1(input: &str) -> anyhow::Result<usize> {
 	Ok(count_paths(
 		&Cave::from(0, true),
 		&build_graph(input),
-		&Vec::new(),
+		&mut Vec::new(),
 		true,
 	))
 }
@@ -14,7 +14,7 @@ fn pt2(input: &str) -> anyhow::Result<usize> {
 	Ok(count_paths(
 		&Cave::from(0, true),
 		&build_graph(input),
-		&Vec::new(),
+		&mut Vec::new(),
 		false,
 	))
 }
@@ -25,7 +25,7 @@ const END: u8 = 1;
 fn count_paths(
 	cave: &Cave,
 	mapping: &HashMap<u8, Vec<Cave>>,
-	visited: &Vec<u8>,
+	visited: &mut Vec<u8>,
 	mut has_double_visited: bool,
 ) -> usize {
 	if cave.id == END {
@@ -36,19 +36,20 @@ fn count_paths(
 		return 0;
 	}
 
-	let mut visited = visited.clone();
 	if cave.is_small && visited.contains(&cave.id) {
 		has_double_visited = true;
 	}
 
-	if cave.is_small {
-		visited.push(cave.id);
-	}
+	visited.push(cave.id);
 
-	mapping[&cave.id]
+	let result = mapping[&cave.id]
 		.iter()
-		.map(|next_point| count_paths(next_point, mapping, &visited, has_double_visited))
-		.sum()
+		.map(|next_point| count_paths(next_point, mapping, visited, has_double_visited))
+		.sum();
+
+	visited.pop();
+
+	result
 }
 
 fn build_graph(input: &str) -> HashMap<u8, Vec<Cave>> {
