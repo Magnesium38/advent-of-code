@@ -5,41 +5,30 @@ use itertools::Itertools;
 fn pt1(input: &str) -> anyhow::Result<usize> {
 	fn find_paths(
 		starting_point: &str,
-		mapping: HashMap<&str, Vec<&str>>,
-		path: String,
-		visited: HashSet<&str>,
-	) -> Vec<String> {
-		let mut paths: Vec<String> = Vec::new();
+		mapping: &HashMap<&str, Vec<&str>>,
+		visited: &HashSet<&str>,
+	) -> usize {
+		let mut count = 0;
 
-		mapping
-			.clone()
-			.get(starting_point)
-			.unwrap()
-			.iter()
-			.for_each(|end| {
-				if end == &"end" {
-					let mut dest = path.clone();
-					dest.push_str(format!(",{}", end).as_str());
-					paths.push(dest);
-					return;
-				}
+		mapping[starting_point].iter().for_each(|end| {
+			if end == &"end" {
+				count += 1;
+				return;
+			}
 
-				if visited.contains(end) {
-					return;
-				}
+			if visited.contains(end) {
+				return;
+			}
 
-				let mut new_path = path.clone();
-				new_path.push_str(format!(",{}", end).as_str());
+			let mut visited = visited.clone();
+			if end.chars().all(|c| c.is_ascii_lowercase()) {
+				visited.insert(end);
+			}
 
-				let mut visited = visited.clone();
-				if end.chars().all(|c| c.is_ascii_lowercase()) {
-					visited.insert(end);
-				}
+			count += find_paths(end, mapping, &visited);
+		});
 
-				paths.extend(find_paths(end, mapping.clone(), new_path, visited));
-			});
-
-		paths
+		count
 	}
 
 	let mut mapping = HashMap::new();
@@ -56,14 +45,11 @@ fn pt1(input: &str) -> anyhow::Result<usize> {
 		}
 	});
 
-	let paths = find_paths(
+	Ok(find_paths(
 		"start",
-		mapping.clone(),
-		String::from("start"),
-		HashSet::from_iter(vec!["start"]),
-	);
-
-	Ok(paths.len())
+		&mapping,
+		&HashSet::from_iter(vec!["start"]),
+	))
 }
 
 fn pt2(input: &str) -> anyhow::Result<usize> {
