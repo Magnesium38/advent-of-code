@@ -34,8 +34,8 @@ fn pt1(input: &str) -> anyhow::Result<usize> {
 fn pt2(input: &str) -> anyhow::Result<usize> {
 	fn find_paths(
 		starting_point: &str,
-		mapping: HashMap<&str, Vec<&str>>,
-		visited: HashSet<&str>,
+		mapping: &HashMap<&str, Vec<&str>>,
+		visited: &HashSet<&str>,
 		has_double_visited: bool,
 	) -> usize {
 		let mut count = 0;
@@ -55,14 +55,14 @@ fn pt2(input: &str) -> anyhow::Result<usize> {
 
 					let mut visited = visited.clone();
 					visited.insert(end);
-					count += find_paths(end, mapping.clone(), visited, true);
+					count += find_paths(end, mapping, &visited, true);
 					return;
 				}
 
 				visited.insert(end);
 			}
 
-			count += find_paths(end, mapping.clone(), visited, has_double_visited);
+			count += find_paths(end, mapping, &visited, has_double_visited);
 		});
 
 		count
@@ -70,8 +70,8 @@ fn pt2(input: &str) -> anyhow::Result<usize> {
 
 	Ok(find_paths(
 		"start",
-		build_graph(input),
-		HashSet::new(),
+		&build_graph(input),
+		&HashSet::new(),
 		false,
 	))
 }
