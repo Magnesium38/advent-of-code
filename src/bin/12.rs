@@ -70,7 +70,7 @@ fn build_graph(input: &str) -> HashMap<u8, Vec<Cave>> {
 			id
 		});
 
-		if start != "start" && end != "end" {
+		if start_id != START && end_id != END {
 			let start_is_small = start.chars().next().unwrap().is_lowercase();
 
 			mapping
@@ -79,7 +79,7 @@ fn build_graph(input: &str) -> HashMap<u8, Vec<Cave>> {
 				.push(Cave::from(start_id, start_is_small));
 		}
 
-		if end != "start" && start != "end" {
+		if end_id != START && start_id != END {
 			let end_is_small = end.chars().next().unwrap().is_lowercase();
 
 			mapping
