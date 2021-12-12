@@ -106,22 +106,27 @@ fn pt2(input: &str) -> anyhow::Result<usize> {
 						} else {
 							let mut visited = visited.clone();
 							visited.insert(end);
-							paths.extend(find_paths(end, mapping.clone(), new_path.clone(), visited, true));
+							paths.extend(find_paths(
+								end,
+								mapping.clone(),
+								new_path.clone(),
+								visited,
+								true,
+							));
 							return;
 						}
 					}
 				}
-				
+
 				let mut visited = visited.clone();
 				visited.insert(end);
-				paths.extend(find_paths(end, mapping.clone(), new_path, visited, has_double_visited));
-				
-				// if can_visit_only_once {
-				// 	let mut visited = visited.clone();
-				// 	visited.insert(end);
-				// 	paths.extend(find_paths(end, mapping.clone(), new_path.clone(), visited, true));
-				// }
-
+				paths.extend(find_paths(
+					end,
+					mapping.clone(),
+					new_path,
+					visited,
+					has_double_visited,
+				));
 			});
 
 		paths
@@ -148,8 +153,6 @@ fn pt2(input: &str) -> anyhow::Result<usize> {
 		HashSet::from_iter(vec!["start"]),
 		false,
 	);
-
-	dbg!(&paths);
 
 	Ok(paths.len())
 }
