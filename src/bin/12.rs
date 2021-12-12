@@ -35,11 +35,10 @@ fn pt2(input: &str) -> anyhow::Result<usize> {
 	fn find_paths(
 		starting_point: &str,
 		mapping: HashMap<&str, Vec<&str>>,
-		path: String,
 		visited: HashSet<&str>,
 		has_double_visited: bool,
-	) -> Vec<String> {
-		let mut paths: Vec<String> = Vec::new();
+	) -> usize {
+		let mut count = 0;
 
 		mapping[starting_point].iter().for_each(|end| {
 			if end == &"start" {
@@ -47,14 +46,9 @@ fn pt2(input: &str) -> anyhow::Result<usize> {
 			}
 
 			if end == &"end" {
-				let mut dest = path.clone();
-				dest.push_str(format!(",{}", end).as_str());
-				paths.push(dest);
+				count += 1;
 				return;
 			}
-
-			let mut new_path = path.clone();
-			new_path.push_str(format!(",{}", end).as_str());
 
 			let mut visited = visited.clone();
 			if end.chars().all(|c| c.is_ascii_lowercase()) {
@@ -65,40 +59,35 @@ fn pt2(input: &str) -> anyhow::Result<usize> {
 
 					let mut visited = visited.clone();
 					visited.insert(end);
-					paths.extend(find_paths(
+					count += find_paths(
 						end,
 						mapping.clone(),
-						new_path.clone(),
 						visited,
 						true,
-					));
+					);
 					return;
 				}
 
 				visited.insert(end);
 			}
 
-			paths.extend(find_paths(
+			count += find_paths(
 				end,
 				mapping.clone(),
-				new_path,
 				visited,
 				has_double_visited,
-			));
+			);
 		});
 
-		paths
+		count
 	}
 
-	let paths = find_paths(
+	Ok(find_paths(
 		"start",
 		build_graph(input),
-		String::from("start"),
 		HashSet::new(),
 		false,
-	);
-
-	Ok(paths.len())
+	))
 }
 
 fn build_graph(input: &str) -> HashMap<&str, Vec<&str>> {
