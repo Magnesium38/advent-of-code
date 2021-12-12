@@ -1,11 +1,11 @@
 use itertools::Itertools;
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 
 fn pt1(input: &str) -> anyhow::Result<usize> {
 	Ok(count_paths(
 		&Cave::from(0, true),
 		&build_graph(input),
-		&HashSet::new(),
+		&Vec::new(),
 		true,
 	))
 }
@@ -14,7 +14,7 @@ fn pt2(input: &str) -> anyhow::Result<usize> {
 	Ok(count_paths(
 		&Cave::from(0, true),
 		&build_graph(input),
-		&HashSet::new(),
+		&Vec::new(),
 		false,
 	))
 }
@@ -25,7 +25,7 @@ const END: u8 = 1;
 fn count_paths(
 	cave: &Cave,
 	mapping: &HashMap<u8, Vec<Cave>>,
-	visited: &HashSet<u8>,
+	visited: &Vec<u8>,
 	mut has_double_visited: bool,
 ) -> usize {
 	if cave.id == END {
@@ -42,7 +42,7 @@ fn count_paths(
 	}
 
 	if cave.is_small {
-		visited.insert(cave.id);
+		visited.push(cave.id);
 	}
 
 	mapping[&cave.id]
