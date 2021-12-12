@@ -1,11 +1,10 @@
-use itertools::Itertools;
 use std::collections::HashMap;
 
 fn pt1(input: &str) -> anyhow::Result<usize> {
 	Ok(count_paths(
 		&Cave::from(0, true),
 		&build_graph(input),
-		&mut Vec::new(),
+		&mut Vec::with_capacity(25),
 		true,
 	))
 }
@@ -14,7 +13,7 @@ fn pt2(input: &str) -> anyhow::Result<usize> {
 	Ok(count_paths(
 		&Cave::from(0, true),
 		&build_graph(input),
-		&mut Vec::new(),
+		&mut Vec::with_capacity(25),
 		false,
 	))
 }
@@ -60,7 +59,7 @@ fn build_graph(input: &str) -> HashMap<u8, Vec<Cave>> {
 	let mut id: u8 = 1;
 
 	input.lines().for_each(|line| {
-		let (start, end) = line.split('-').take(2).collect_tuple().unwrap();
+		let (start, end) = line.split_once('-').unwrap();
 
 		let start_id = *ids.entry(start).or_insert_with(|| {
 			id += 1;
@@ -76,7 +75,7 @@ fn build_graph(input: &str) -> HashMap<u8, Vec<Cave>> {
 
 			mapping
 				.entry(end_id)
-				.or_insert_with(Vec::new)
+				.or_insert_with(|| Vec::with_capacity(10))
 				.push(Cave::from(start_id, start_is_small));
 		}
 
@@ -85,7 +84,7 @@ fn build_graph(input: &str) -> HashMap<u8, Vec<Cave>> {
 
 			mapping
 				.entry(start_id)
-				.or_insert_with(Vec::new)
+				.or_insert_with(|| Vec::with_capacity(10))
 				.push(Cave::from(end_id, end_is_small));
 		}
 	});
