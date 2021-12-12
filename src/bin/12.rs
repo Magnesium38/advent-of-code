@@ -46,11 +46,11 @@ fn pt1(input: &str) -> anyhow::Result<usize> {
 		let (start, end) = line.split('-').take(2).collect_tuple().unwrap();
 
 		{
-			mapping.entry(start).or_insert(Vec::new()).push(end);
+			mapping.entry(start).or_insert_with(Vec::new).push(end);
 		}
 
 		{
-			mapping.entry(end).or_insert(Vec::new()).push(start);
+			mapping.entry(end).or_insert_with(Vec::new).push(start);
 		}
 	});
 
@@ -99,23 +99,20 @@ fn pt2(input: &str) -> anyhow::Result<usize> {
 					return;
 				}
 
-				if can_visit_only_once {
-					if visited.contains(end) {
-						if has_double_visited {
-							return;
-						} else {
-							let mut visited = visited.clone();
-							visited.insert(end);
-							paths.extend(find_paths(
-								end,
-								mapping.clone(),
-								new_path.clone(),
-								visited,
-								true,
-							));
-							return;
-						}
+				if can_visit_only_once && visited.contains(end) {
+					if !has_double_visited {
+						let mut visited = visited.clone();
+						visited.insert(end);
+						paths.extend(find_paths(
+							end,
+							mapping.clone(),
+							new_path.clone(),
+							visited,
+							true,
+						));
 					}
+
+					return;
 				}
 
 				let mut visited = visited.clone();
@@ -138,11 +135,11 @@ fn pt2(input: &str) -> anyhow::Result<usize> {
 		let (start, end) = line.split('-').take(2).collect_tuple().unwrap();
 
 		{
-			mapping.entry(start).or_insert(Vec::new()).push(end);
+			mapping.entry(start).or_insert_with(Vec::new).push(end);
 		}
 
 		{
-			mapping.entry(end).or_insert(Vec::new()).push(start);
+			mapping.entry(end).or_insert_with(Vec::new).push(start);
 		}
 	});
 
