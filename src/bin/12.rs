@@ -4,86 +4,106 @@ use itertools::Itertools;
 
 fn pt1(input: &str) -> anyhow::Result<usize> {
 	fn count_paths(
-		starting_point: &str,
-		mapping: &HashMap<&str, Vec<&str>>,
+		starting_point: &Cave,
+		mapping: &HashMap<&str, Vec<Cave>>,
 		visited: &HashSet<&str>,
 	) -> usize {
-		if starting_point == "end" {
+		if starting_point.s == "end" {
 			return 1;
 		}
 
-		let is_lowercase = starting_point.chars().all(|c| c.is_ascii_lowercase());
-		if visited.contains(starting_point) && is_lowercase {
+		let is_lowercase = starting_point.s.chars().all(|c| c.is_ascii_lowercase());
+		if visited.contains(starting_point.s) && is_lowercase {
 			return 0;
 		}
 
 		let mut visited = visited.clone();
 		if is_lowercase {
-			visited.insert(starting_point);
+			visited.insert(starting_point.s);
 		}
 
-		mapping[starting_point]
+		mapping[starting_point.s]
 			.iter()
-			.map(|&next_point| count_paths(next_point, mapping, &visited))
+			.map(|next_point| count_paths(next_point, mapping, &visited))
 			.sum()
 	}
 
-	Ok(count_paths("start", &build_graph(input), &HashSet::new()))
+	Ok(count_paths(&Cave::from("start"), &build_graph(input), &HashSet::new()))
 }
 
 fn pt2(input: &str) -> anyhow::Result<usize> {
-	fn find_paths(
-		starting_point: &str,
-		mapping: &HashMap<&str, Vec<&str>>,
+	fn count_paths(
+		starting_point: &Cave,
+		mapping: &HashMap<&str, Vec<Cave>>,
 		visited: &HashSet<&str>,
 		mut has_double_visited: bool,
 	) -> usize {
-		if starting_point == "end" {
+		if starting_point.s == "end" {
 			return 1;
 		}
 
-		let is_lowercase = starting_point.chars().all(|c| c.is_ascii_lowercase());
-		if is_lowercase && has_double_visited && visited.contains(starting_point) {
+		let is_lowercase = starting_point.s.chars().all(|c| c.is_ascii_lowercase());
+		if is_lowercase && has_double_visited && visited.contains(starting_point.s) {
 			return 0;
 		}
 
 		let mut visited = visited.clone();
-		if is_lowercase && visited.contains(starting_point) {
+		if is_lowercase && visited.contains(starting_point.s) {
 			has_double_visited = true;
 		}
 
 		if is_lowercase {
-			visited.insert(starting_point);
+			visited.insert(starting_point.s);
 		}
 
-		mapping[starting_point]
+		mapping[starting_point.s]
 			.iter()
-			.map(|&next_point| find_paths(next_point, mapping, &visited, has_double_visited))
+			.map(|next_point| count_paths(next_point, mapping, &visited, has_double_visited))
 			.sum()
 	}
 
-	Ok(find_paths(
-		"start",
+	Ok(count_paths(
+		&Cave::from("start"),
 		&build_graph(input),
 		&HashSet::new(),
 		false,
 	))
 }
 
-fn build_graph(input: &str) -> HashMap<&str, Vec<&str>> {
+fn build_graph(input: &str) -> HashMap<&str, Vec<Cave>> {
 	let mut mapping = HashMap::new();
 
 	input.lines().for_each(|line| {
 		let (start, end) = line.split('-').take(2).collect_tuple().unwrap();
 
 		if start != "start" && end != "end" {
-			mapping.entry(end).or_insert_with(Vec::new).push(start);
+			mapping
+				.entry(end)
+				.or_insert_with(Vec::new)
+				.push(Cave::from(start));
 		}
 
-		mapping.entry(start).or_insert_with(Vec::new).push(end);
+		mapping
+			.entry(start)
+			.or_insert_with(Vec::new)
+			.push(Cave::from(end));
 	});
 
 	mapping
+}
+
+struct Cave<'a> {
+	s: &'a str,
+	lowercase: bool,
+}
+
+impl<'a> Cave<'a> {
+	fn from(s: &'a str) -> Self {
+		Cave {
+			s,
+			lowercase: s.chars().all(|c| c.is_ascii_lowercase()),
+		}
+	}
 }
 
 advent::problem!(
