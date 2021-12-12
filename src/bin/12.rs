@@ -28,7 +28,11 @@ fn pt1(input: &str) -> anyhow::Result<usize> {
 			.sum()
 	}
 
-	Ok(count_paths(&Cave::from("start"), &build_graph(input), &HashSet::new()))
+	Ok(count_paths(
+		&Cave::from("start"),
+		&build_graph(input),
+		&HashSet::new(),
+	))
 }
 
 fn pt2(input: &str) -> anyhow::Result<usize> {
@@ -82,7 +86,6 @@ fn build_graph(input: &str) -> HashMap<&str, Vec<Cave>> {
 				.or_insert_with(Vec::new)
 				.push(Cave::from(start));
 		}
-
 
 		if end != "start" && start != "end" {
 			mapping
