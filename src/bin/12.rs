@@ -3,53 +3,32 @@ use std::collections::{HashMap, HashSet};
 use itertools::Itertools;
 
 fn pt1(input: &str) -> anyhow::Result<usize> {
-	fn find_paths(
+	fn count_paths(
 		starting_point: &str,
 		mapping: &HashMap<&str, Vec<&str>>,
 		visited: &HashSet<&str>,
 	) -> usize {
-		let mut count = 0;
+		if starting_point == "end" {
+			return 1;
+		}
 
-		mapping[starting_point].iter().for_each(|end| {
-			if end == &"end" {
-				count += 1;
-				return;
-			}
+		let is_lowercase = starting_point.chars().all(|c| c.is_ascii_lowercase());
+		if visited.contains(starting_point) && is_lowercase {
+			return 0;
+		}
 
-			if visited.contains(end) {
-				return;
-			}
+		let mut visited = visited.clone();
+		if is_lowercase {
+			visited.insert(starting_point);
+		}
 
-			let mut visited = visited.clone();
-			if end.chars().all(|c| c.is_ascii_lowercase()) {
-				visited.insert(end);
-			}
-
-			count += find_paths(end, mapping, &visited);
-		});
-
-		count
+		mapping[starting_point]
+			.iter()
+			.map(|&next_point| count_paths(next_point, mapping, &visited))
+			.sum()
 	}
 
-	let mut mapping = HashMap::new();
-
-	input.lines().for_each(|line| {
-		let (start, end) = line.split('-').take(2).collect_tuple().unwrap();
-
-		{
-			mapping.entry(start).or_insert_with(Vec::new).push(end);
-		}
-
-		{
-			mapping.entry(end).or_insert_with(Vec::new).push(start);
-		}
-	});
-
-	Ok(find_paths(
-		"start",
-		&mapping,
-		&HashSet::from_iter(vec!["start"]),
-	))
+	Ok(count_paths("start", &build_graph(input), &HashSet::new()))
 }
 
 fn pt2(input: &str) -> anyhow::Result<usize> {
@@ -139,6 +118,19 @@ fn pt2(input: &str) -> anyhow::Result<usize> {
 	);
 
 	Ok(paths.len())
+}
+
+fn build_graph(input: &str) -> HashMap<&str, Vec<&str>> {
+	let mut mapping = HashMap::new();
+
+	input.lines().for_each(|line| {
+		let (start, end) = line.split('-').take(2).collect_tuple().unwrap();
+
+		mapping.entry(start).or_insert_with(Vec::new).push(end);
+		mapping.entry(end).or_insert_with(Vec::new).push(start);
+	});
+
+	mapping
 }
 
 advent::problem!(
