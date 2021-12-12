@@ -41,10 +41,6 @@ fn pt2(input: &str) -> anyhow::Result<usize> {
 		let mut count = 0;
 
 		mapping[starting_point].iter().for_each(|end| {
-			if end == &"start" {
-				return;
-			}
-
 			if end == &"end" {
 				count += 1;
 				return;
@@ -59,24 +55,14 @@ fn pt2(input: &str) -> anyhow::Result<usize> {
 
 					let mut visited = visited.clone();
 					visited.insert(end);
-					count += find_paths(
-						end,
-						mapping.clone(),
-						visited,
-						true,
-					);
+					count += find_paths(end, mapping.clone(), visited, true);
 					return;
 				}
 
 				visited.insert(end);
 			}
 
-			count += find_paths(
-				end,
-				mapping.clone(),
-				visited,
-				has_double_visited,
-			);
+			count += find_paths(end, mapping.clone(), visited, has_double_visited);
 		});
 
 		count
@@ -96,8 +82,11 @@ fn build_graph(input: &str) -> HashMap<&str, Vec<&str>> {
 	input.lines().for_each(|line| {
 		let (start, end) = line.split('-').take(2).collect_tuple().unwrap();
 
+		if start != "start" && end != "end" {
+			mapping.entry(end).or_insert_with(Vec::new).push(start);
+		}
+
 		mapping.entry(start).or_insert_with(Vec::new).push(end);
-		mapping.entry(end).or_insert_with(Vec::new).push(start);
 	});
 
 	mapping
