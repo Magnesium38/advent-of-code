@@ -1,9 +1,9 @@
-use std::collections::{HashMap, HashSet};
 use itertools::Itertools;
+use std::collections::{HashMap, HashSet};
 
 fn pt1(input: &str) -> anyhow::Result<usize> {
 	Ok(count_paths(
-		&Cave::from("start", 0),
+		&Cave::from(0, true),
 		&build_graph(input),
 		&HashSet::new(),
 		true,
@@ -12,7 +12,7 @@ fn pt1(input: &str) -> anyhow::Result<usize> {
 
 fn pt2(input: &str) -> anyhow::Result<usize> {
 	Ok(count_paths(
-		&Cave::from("start", 0),
+		&Cave::from(0, true),
 		&build_graph(input),
 		&HashSet::new(),
 		false,
@@ -32,7 +32,7 @@ fn count_paths(
 		return 1;
 	}
 
-	let is_lowercase = starting_point.lowercase;
+	let is_lowercase = starting_point.is_small;
 	if is_lowercase && has_double_visited && visited.contains(&starting_point.id) {
 		return 0;
 	}
@@ -72,17 +72,21 @@ fn build_graph(input: &str) -> HashMap<u8, Vec<Cave>> {
 		});
 
 		if start != "start" && end != "end" {
+			let start_is_small = start.chars().next().unwrap().is_lowercase();
+
 			mapping
 				.entry(end_id)
 				.or_insert_with(Vec::new)
-				.push(Cave::from(start, start_id));
+				.push(Cave::from(start_id, start_is_small));
 		}
 
 		if end != "start" && start != "end" {
+			let end_is_small = end.chars().next().unwrap().is_lowercase();
+
 			mapping
 				.entry(start_id)
 				.or_insert_with(Vec::new)
-				.push(Cave::from(end, end_id));
+				.push(Cave::from(end_id, end_is_small));
 		}
 	});
 
@@ -91,15 +95,12 @@ fn build_graph(input: &str) -> HashMap<u8, Vec<Cave>> {
 
 struct Cave {
 	id: u8,
-	lowercase: bool,
+	is_small: bool,
 }
 
 impl Cave {
-	fn from(s: &str, id: u8) -> Self {
-		Cave {
-			id,
-			lowercase: s.chars().all(|c| c.is_ascii_lowercase()),
-		}
+	fn from(id: u8, is_small: bool) -> Self {
+		Cave { id, is_small }
 	}
 }
 
