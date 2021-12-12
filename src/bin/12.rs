@@ -36,36 +36,30 @@ fn pt2(input: &str) -> anyhow::Result<usize> {
 		starting_point: &str,
 		mapping: &HashMap<&str, Vec<&str>>,
 		visited: &HashSet<&str>,
-		has_double_visited: bool,
+		mut has_double_visited: bool,
 	) -> usize {
-		let mut count = 0;
+		if starting_point == "end" {
+			return 1;
+		}
 
-		mapping[starting_point].iter().for_each(|end| {
-			if end == &"end" {
-				count += 1;
-				return;
-			}
+		let is_lowercase = starting_point.chars().all(|c| c.is_ascii_lowercase());
+		if is_lowercase && has_double_visited && visited.contains(starting_point) {
+			return 0;
+		}
 
-			let mut visited = visited.clone();
-			if end.chars().all(|c| c.is_ascii_lowercase()) {
-				if visited.contains(end) {
-					if has_double_visited {
-						return;
-					}
+		let mut visited = visited.clone();
+		if is_lowercase && visited.contains(starting_point) {
+			has_double_visited = true;
+		}
 
-					let mut visited = visited.clone();
-					visited.insert(end);
-					count += find_paths(end, mapping, &visited, true);
-					return;
-				}
+		if is_lowercase {
+			visited.insert(starting_point);
+		}
 
-				visited.insert(end);
-			}
-
-			count += find_paths(end, mapping, &visited, has_double_visited);
-		});
-
-		count
+		mapping[starting_point]
+			.iter()
+			.map(|&next_point| find_paths(next_point, mapping, &visited, has_double_visited))
+			.sum()
 	}
 
 	Ok(find_paths(
