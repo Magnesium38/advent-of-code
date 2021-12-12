@@ -32,7 +32,7 @@ fn pt1(input: &str) -> anyhow::Result<usize> {
 				new_path.push_str(format!(",{}", end).as_str());
 
 				let mut visited = visited.clone();
-				if end.chars().next().unwrap().is_ascii_lowercase() {
+				if end.chars().all(|c| c.is_ascii_lowercase()) {
 					visited.insert(end);
 				}
 
@@ -97,7 +97,7 @@ fn pt2(input: &str) -> anyhow::Result<usize> {
 				new_path.push_str(format!(",{}", end).as_str());
 
 				let mut visited = visited.clone();
-				if end.chars().next().unwrap().is_ascii_lowercase() {
+				if end.chars().all(|c| c.is_ascii_lowercase()) {
 					if visited.contains(end) {
 						if has_double_visited {
 							return;
