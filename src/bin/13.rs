@@ -1,17 +1,15 @@
-use std::collections::HashMap;
+use std::collections::HashSet;
 
 fn pt1(input: &str) -> anyhow::Result<usize> {
-	dbg!(input);
-
 	let (points, folds) = input.split_once("\n\n").unwrap();
 
-	let mut grid: HashMap<(isize, isize), _> = HashMap::new();
+	let mut grid: HashSet<(isize, isize)> = HashSet::new();
 	points.lines().for_each(|line| {
 		let (x, y) = line.split_once(',').unwrap();
 		let x = x.parse::<isize>().unwrap();
 		let y = y.parse::<isize>().unwrap();
 
-		grid.insert((x, y), Point::Dot);
+		grid.insert((x, y));
 	});
 
 	let mut result = folds.lines().map(|line| {
@@ -20,38 +18,25 @@ fn pt1(input: &str) -> anyhow::Result<usize> {
 
 		if line.contains("x=") {
 			grid.clone()
-				.keys()
+				.iter()
 				.filter(|(x, _)| *x > amount)
-				.for_each(|(x, y)| match grid.remove(&(*x, *y)) {
-					Some(Point::Dot) => {
-						dbg!(((x, y), (amount - (x - amount).abs(), y)));
-
-						grid.insert((amount - (x - amount).abs(), *y), Point::Dot);
+				.for_each(|(x, y)| {
+					if grid.remove(&(*x, *y)) {
+						grid.insert((amount - (x - amount).abs(), *y));
 					}
-					_ => {}
 				});
 		} else {
 			grid.clone()
-				.keys()
+				.iter()
 				.filter(|(_, y)| *y > amount)
-				.for_each(|(x, y)| match grid.remove(&(*x, *y)) {
-					Some(Point::Dot) => {
-						dbg!(((x, y), (*x, amount - (y - amount).abs())));
-
-						grid.insert((*x, amount - (y - amount).abs()), Point::Dot);
+				.for_each(|(x, y)| {
+					if grid.remove(&(*x, *y)) {
+						grid.insert((*x, amount - (y - amount).abs()));
 					}
-					_ => {}
 				});
 		}
 
-		grid.iter()
-			.map(|(coords, point)| {
-				dbg!(coords);
-
-				(coords, point)
-			})
-			.filter(|(_, point)| matches!(point, Point::Dot))
-			.count()
+		grid.len()
 	});
 
 	Ok(result.next().unwrap())
@@ -60,13 +45,13 @@ fn pt1(input: &str) -> anyhow::Result<usize> {
 fn pt2(input: &str) -> anyhow::Result<isize> {
 	let (points, folds) = input.split_once("\n\n").unwrap();
 
-	let mut grid: HashMap<(isize, isize), _> = HashMap::new();
+	let mut grid: HashSet<(isize, isize)> = HashSet::new();
 	points.lines().for_each(|line| {
 		let (x, y) = line.split_once(',').unwrap();
 		let x = x.parse::<isize>().unwrap();
 		let y = y.parse::<isize>().unwrap();
 
-		grid.insert((x, y), Point::Dot);
+		grid.insert((x, y));
 	});
 
 	folds.lines().for_each(|line| {
@@ -75,37 +60,31 @@ fn pt2(input: &str) -> anyhow::Result<isize> {
 
 		if line.contains("x=") {
 			grid.clone()
-				.keys()
+				.iter()
 				.filter(|(x, _)| *x > amount)
-				.for_each(|(x, y)| match grid.remove(&(*x, *y)) {
-					Some(Point::Dot) => {
-						dbg!(((x, y), (amount - (x - amount).abs(), y)));
-
-						grid.insert((amount - (x - amount).abs(), *y), Point::Dot);
+				.for_each(|(x, y)| {
+					if grid.remove(&(*x, *y)) {
+						grid.insert((amount - (x - amount).abs(), *y));
 					}
-					_ => {}
 				});
 		} else {
 			grid.clone()
-				.keys()
+				.iter()
 				.filter(|(_, y)| *y > amount)
-				.for_each(|(x, y)| match grid.remove(&(*x, *y)) {
-					Some(Point::Dot) => {
-						dbg!(((x, y), (*x, amount - (y - amount).abs())));
-
-						grid.insert((*x, amount - (y - amount).abs()), Point::Dot);
+				.for_each(|(x, y)| {
+					if grid.remove(&(*x, *y)) {
+						grid.insert((*x, amount - (y - amount).abs()));
 					}
-					_ => {}
 				});
 		}
 	});
 
-	let (max_x, _) = grid.keys().max_by_key(|(x, _)| *x).unwrap();
-	let (_, max_y) = grid.keys().max_by_key(|(_, y)| *y).unwrap();
+	let (max_x, _) = grid.iter().max_by_key(|(x, _)| *x).unwrap();
+	let (_, max_y) = grid.iter().max_by_key(|(_, y)| *y).unwrap();
 
 	for y in 0..=*max_y {
 		for x in 0..=*max_x {
-			if grid.contains_key(&(x, y)) {
+			if grid.contains(&(x, y)) {
 				print!("#");
 			} else {
 				print!(" ");
@@ -116,12 +95,6 @@ fn pt2(input: &str) -> anyhow::Result<isize> {
 	}
 
 	Ok(1)
-}
-
-#[derive(Debug, Clone, Copy)]
-enum Point {
-	Empty,
-	Dot,
 }
 
 advent::problem!(
