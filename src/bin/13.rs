@@ -1,4 +1,4 @@
-use std::collections::HashSet;
+use hashbrown::HashSet;
 
 fn pt1(input: &str) -> anyhow::Result<usize> {
 	let (points, folds) = input.split_once("\n\n").unwrap();
@@ -17,22 +17,18 @@ fn pt1(input: &str) -> anyhow::Result<usize> {
 		let amount = amount.parse::<isize>().unwrap();
 
 		if line.contains("x=") {
-			grid.clone()
+			grid.drain_filter(|&(x, _)| x > amount)
+				.collect::<Vec<_>>()
 				.iter()
-				.filter(|(x, _)| *x > amount)
-				.for_each(|(x, y)| {
-					if grid.remove(&(*x, *y)) {
-						grid.insert((amount - (x - amount).abs(), *y));
-					}
+				.for_each(|&(x, y)| {
+					grid.insert((amount - (x - amount).abs(), y));
 				});
 		} else {
-			grid.clone()
+			grid.drain_filter(|&(_, y)| y > amount)
+				.collect::<Vec<_>>()
 				.iter()
-				.filter(|(_, y)| *y > amount)
-				.for_each(|(x, y)| {
-					if grid.remove(&(*x, *y)) {
-						grid.insert((*x, amount - (y - amount).abs()));
-					}
+				.for_each(|&(x, y)| {
+					grid.insert((x, amount - (y - amount).abs()));
 				});
 		}
 
