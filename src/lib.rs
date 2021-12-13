@@ -36,9 +36,9 @@ macro_rules! test {
 
 			fn prepare_input<'a>(input: &'a str) -> String {
 				input
+					.trim()
 					.lines()
 					.map(|line| line.trim())
-					.filter(|line| !line.is_empty())
 					.collect::<Vec<_>>()
 					.join("\n")
 			}
