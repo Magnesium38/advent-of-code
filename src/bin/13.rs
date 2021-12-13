@@ -42,7 +42,7 @@ fn pt1(input: &str) -> anyhow::Result<usize> {
 	Ok(result.next().unwrap())
 }
 
-fn pt2(input: &str) -> anyhow::Result<isize> {
+fn pt2(input: &str) -> anyhow::Result<String> {
 	let (points, folds) = input.split_once("\n\n").unwrap();
 
 	let mut grid: HashSet<(isize, isize)> = HashSet::new();
@@ -82,19 +82,20 @@ fn pt2(input: &str) -> anyhow::Result<isize> {
 	let (max_x, _) = grid.iter().max_by_key(|(x, _)| *x).unwrap();
 	let (_, max_y) = grid.iter().max_by_key(|(_, y)| *y).unwrap();
 
+	let mut result = String::from("\n");
 	for y in 0..=*max_y {
 		for x in 0..=*max_x {
 			if grid.contains(&(x, y)) {
-				print!("#");
+				result.push('#');
 			} else {
-				print!(" ");
+				result.push(' ');
 			}
 		}
 
-		println!();
+		result.push('\n');
 	}
 
-	Ok(1)
+	Ok(result)
 }
 
 advent::problem!(
@@ -122,5 +123,5 @@ advent::problem!(
 		fold along x=5
 	"#,
 	17,
-	0,
+	"\n#####\n#   #\n#   #\n#   #\n#####\n",
 );
