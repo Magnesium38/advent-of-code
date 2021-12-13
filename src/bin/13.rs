@@ -41,35 +41,35 @@ fn pt1(input: &str) -> anyhow::Result<usize> {
 fn pt2(input: &str) -> anyhow::Result<String> {
 	let (points, folds) = input.split_once("\n\n").unwrap();
 
-	let mut grid: HashSet<(isize, isize)> = HashSet::new();
-	points.lines().for_each(|line| {
-		let (x, y) = line.split_once(',').unwrap();
-		let x = x.parse::<isize>().unwrap();
-		let y = y.parse::<isize>().unwrap();
+	let grid: HashSet<(isize, isize)> = HashSet::from_iter(
+		folds.lines().fold(
+			points
+				.lines()
+				.map(|line| {
+					let (x, y) = line.split_once(',').unwrap();
+					let x = x.parse::<isize>().unwrap();
+					let y = y.parse::<isize>().unwrap();
 
-		grid.insert((x, y));
-	});
+					(x, y)
+				})
+				.collect::<Vec<_>>(),
+			|points, line| {
+				let is_x = line.contains("x=");
+				let (_, line) = line.split_once("=").unwrap();
+				let line = line.parse::<isize>().unwrap();
 
-	folds.lines().for_each(|line| {
-		let (_, amount) = line.split_once("=").unwrap();
-		let amount = amount.parse::<isize>().unwrap();
-
-		if line.contains("x=") {
-			grid.drain_filter(|&(x, _)| x > amount)
-				.collect::<Vec<_>>()
-				.iter()
-				.for_each(|&(x, y)| {
-					grid.insert((amount - (x - amount).abs(), y));
-				});
-		} else {
-			grid.drain_filter(|&(_, y)| y > amount)
-				.collect::<Vec<_>>()
-				.iter()
-				.for_each(|&(x, y)| {
-					grid.insert((x, amount - (y - amount).abs()));
-				});
-		}
-	});
+				points
+					.iter()
+					.map(|&(x, y)| match (is_x, (x, y)) {
+						(true, (x, y)) if x > line => (line + line - x, y),
+						(true, (x, y)) => (x, y),
+						(false, (x, y)) if y > line => (x, line + line - y),
+						(false, (x, y)) => (x, y),
+					})
+					.collect()
+			},
+		),
+	);
 
 	let (max_x, _) = grid.iter().max_by_key(|(x, _)| *x).unwrap();
 	let (_, max_y) = grid.iter().max_by_key(|(_, y)| *y).unwrap();
