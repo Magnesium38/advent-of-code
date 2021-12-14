@@ -32,7 +32,7 @@ impl Solver {
 				.map(|(a, b)| {
 					(
 						a.chars().collect_tuple::<(_, _)>().unwrap(),
-						b.chars().nth(0).unwrap(),
+						b.chars().next().unwrap(),
 					)
 				})
 				.fold(HashMap::new(), |mut acc, (a, b)| {
