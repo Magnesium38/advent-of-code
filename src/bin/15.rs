@@ -53,11 +53,14 @@ fn pt2(input: &str) -> anyhow::Result<u32> {
 
 	let grid: HashMap<(isize, isize), u32> = (0..5)
 		.cartesian_product(0..5)
-		.flat_map(|(x, y)| {
-			input.iter().map(move |((i, j), cost)| {
+		.flat_map(|(x, y): (isize, isize)| {
+			input.iter().map(move |((i, j), &cost)| {
+				let x_cost: u32 = x.try_into().unwrap();
+				let y_cost: u32 = y.try_into().unwrap();
+
 				(
 					(x * width + i, y * height + j),
-					(cost + &x.try_into().unwrap() + &y.try_into().unwrap() - 1) % 9 + 1,
+					(cost + x_cost + y_cost - 1) % 9 + 1,
 				)
 			})
 		})
