@@ -53,64 +53,41 @@ impl Packet {
 	}
 
 	fn value(&self) -> usize {
-		match self.type_id {
-			4 => self.literal.unwrap(),
+		match (self.literal, self.subpackets.as_ref()) {
+			(Some(literal), _) => literal,
 
-			0 => self
-				.subpackets
-				.as_ref()
-				.unwrap()
-				.iter()
-				.map(|p| p.value())
-				.sum(),
-			1 => self
-				.subpackets
-				.as_ref()
-				.unwrap()
-				.iter()
-				.map(|p| p.value())
-				.product(),
+			(_, Some(subpackets)) => {
+				let subpackets = subpackets.iter().map(|p| p.value());
+				
+				match self.type_id {
+					0 | 1 | 2 | 3 => match self.type_id {
+						0 => subpackets.sum(),
+						1 => subpackets.product(),
+						2 => subpackets.min().unwrap(),
+						3 => subpackets.max().unwrap(),
+						_ => unreachable!(),
+					},
 
-			2 => self
-				.subpackets
-				.as_ref()
-				.unwrap()
-				.iter()
-				.map(|p| p.value())
-				.min()
-				.unwrap(),
-			3 => self
-				.subpackets
-				.as_ref()
-				.unwrap()
-				.iter()
-				.map(|p| p.value())
-				.max()
-				.unwrap(),
+					5 | 6 | 7 => {
+						let (a, b) = subpackets.collect_tuple().unwrap();
 
-			5 | 6 | 7 => {
-				let (a, b) = self
-					.subpackets
-					.as_ref()
-					.unwrap()
-					.iter()
-					.map(|p| p.value())
-					.collect_tuple()
-					.unwrap();
+						if match self.type_id {
+							5 => a > b,
+							6 => a < b,
+							7 => a == b,
+							_ => unreachable!(),
+						} {
+							1
+						} else {
+							0
+						}
+					}
 
-				if match self.type_id {
-					5 => a > b,
-					6 => a < b,
-					7 => a == b,
 					_ => unreachable!(),
-				} {
-					1
-				} else {
-					0
 				}
 			}
 
-			_ => unreachable!(),
+			(_, _) => unreachable!(),
 		}
 	}
 }
