@@ -68,16 +68,12 @@ impl Packet {
 					5 | 6 | 7 => {
 						let (a, b) = subpackets.collect_tuple().unwrap();
 
-						if match self.type_id {
+						(match self.type_id {
 							5 => a > b,
 							6 => a < b,
 							7 => a == b,
 							_ => unreachable!(),
-						} {
-							1
-						} else {
-							0
-						}
+						}) as usize
 					}
 
 					_ => unreachable!(),
