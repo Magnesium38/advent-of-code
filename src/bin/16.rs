@@ -1,72 +1,40 @@
+use itertools::Itertools;
 use std::str::Chars;
 
-use itertools::Itertools;
-
 fn pt1(input: &str) -> anyhow::Result<usize> {
-	let packet = parse_packet(
-		&mut input
-			.chars()
-			.map(|c| match c {
-				'0' => "0000",
-				'1' => "0001",
-				'2' => "0010",
-				'3' => "0011",
-				'4' => "0100",
-				'5' => "0101",
-				'6' => "0110",
-				'7' => "0111",
-				'8' => "1000",
-				'9' => "1001",
-				'A' => "1010",
-				'B' => "1011",
-				'C' => "1100",
-				'D' => "1101",
-				'E' => "1110",
-				'F' => "1111",
-				_ => panic!("Invalid character"),
-			})
-			.join("")
-			.chars(),
-	)?;
-
-	Ok(packet.sum_versions())
+	Ok(parse_packet(&mut input.chars().map(hex_to_binary).join("").chars())?.sum_versions())
 }
 
 fn pt2(input: &str) -> anyhow::Result<usize> {
-	let packet = parse_packet(
-		&mut input
-			.chars()
-			.map(|c| match c {
-				'0' => "0000",
-				'1' => "0001",
-				'2' => "0010",
-				'3' => "0011",
-				'4' => "0100",
-				'5' => "0101",
-				'6' => "0110",
-				'7' => "0111",
-				'8' => "1000",
-				'9' => "1001",
-				'A' => "1010",
-				'B' => "1011",
-				'C' => "1100",
-				'D' => "1101",
-				'E' => "1110",
-				'F' => "1111",
-				_ => panic!("Invalid character"),
-			})
-			.join("")
-			.chars(),
-	)?;
+	Ok(parse_packet(&mut input.chars().map(hex_to_binary).join("").chars())?.value())
+}
 
-	Ok(packet.value())
+fn hex_to_binary(c: char) -> &'static str {
+	match c {
+		'0' => "0000",
+		'1' => "0001",
+		'2' => "0010",
+		'3' => "0011",
+		'4' => "0100",
+		'5' => "0101",
+		'6' => "0110",
+		'7' => "0111",
+		'8' => "1000",
+		'9' => "1001",
+		'A' => "1010",
+		'B' => "1011",
+		'C' => "1100",
+		'D' => "1101",
+		'E' => "1110",
+		'F' => "1111",
+		_ => panic!("Invalid character"),
+	}
 }
 
 fn take(input: &mut Chars, n: usize) -> String {
 	input.take(n).collect()
 }
 
-#[derive(Debug)]
 struct Packet {
 	version: u8,
 	type_id: u8,
@@ -168,20 +136,13 @@ fn parse_packet(mut input: &mut Chars) -> anyhow::Result<Packet> {
 
 		if length_type_id == "0" {
 			let total_length = usize::from_str_radix(&take(&mut input, 15), 2)?;
-
-			let s: String = input.take(total_length).collect();
-			let mut i = s.chars();
-			loop {
-				match parse_packet(&mut i) {
-					Ok(packet) => {
-						packets.push(packet);
-					}
-					Err(_) => break,
-				}
+			let subpackets: String = input.take(total_length).collect();
+			let mut input = subpackets.chars();
+			while let Ok(packet) = parse_packet(&mut input) {
+				packets.push(packet);
 			}
 		} else {
 			let mut subpacket_count = usize::from_str_radix(&take(&mut input, 11), 2)?;
-
 			while subpacket_count > 0 {
 				let subpacket = parse_packet(&mut input)?;
 				packets.push(subpacket);
