@@ -58,15 +58,12 @@ impl Packet {
 
 			(_, Some(subpackets)) => {
 				let subpackets = subpackets.iter().map(|p| p.value());
-				
+
 				match self.type_id {
-					0 | 1 | 2 | 3 => match self.type_id {
-						0 => subpackets.sum(),
-						1 => subpackets.product(),
-						2 => subpackets.min().unwrap(),
-						3 => subpackets.max().unwrap(),
-						_ => unreachable!(),
-					},
+					0 => subpackets.sum(),
+					1 => subpackets.product(),
+					2 => subpackets.min().unwrap(),
+					3 => subpackets.max().unwrap(),
 
 					5 | 6 | 7 => {
 						let (a, b) = subpackets.collect_tuple().unwrap();
