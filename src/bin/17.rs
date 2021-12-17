@@ -18,52 +18,11 @@ fn pt1(input: &str) -> anyhow::Result<isize> {
 		starting_x_velocity += 1;
 	}
 
-	let mut max_y = None;
-
-	for starting_y_velocity in 0..500 {
-		let mut x_velocity = starting_x_velocity;
-		let mut y_velocity = starting_y_velocity;
-		let mut max_y_for_shot = isize::MIN;
-		let mut position = (0, 0);
-
-		loop {
-			if position.0 > x_max || position.1 < y_min {
-				break;
-			}
-
-			position = (position.0 + x_velocity, position.1 + y_velocity);
-
-			x_velocity += -x_velocity.signum();
-			y_velocity -= 1;
-
-			max_y_for_shot = max_y_for_shot.max(position.1);
-
-			if position.0 >= x_min
-				&& position.1 >= y_min
-				&& position.0 <= x_max
-				&& position.1 <= y_max
-			{
-				match max_y {
-					None => {
-						max_y = Some(max_y_for_shot);
-					}
-					Some(current_best) => {
-						if max_y_for_shot > current_best {
-							max_y = Some(max_y_for_shot);
-						}
-					}
-				}
-			}
-		}
-
-		if let Some(max_y) = max_y {
-			if max_y_for_shot < max_y {
-				break;
-			}
-		}
-	}
-
-	max_y.ok_or(anyhow::anyhow!("No max y found"))
+	(0..500)
+		.map(|dy| is_valid_shot(starting_x_velocity, dy, x_min, x_max, y_min, y_max))
+		.flatten()
+		.max()
+		.ok_or(anyhow::anyhow!("no valid shots"))
 }
 
 fn pt2(input: &str) -> anyhow::Result<usize> {
@@ -115,6 +74,41 @@ fn pt2(input: &str) -> anyhow::Result<usize> {
 	}
 
 	Ok(valid.len())
+}
+
+fn is_valid_shot(
+	mut dx: isize,
+	mut dy: isize,
+	x_target_min: isize,
+	x_target_max: isize,
+	y_target_min: isize,
+	y_target_max: isize,
+) -> Option<isize> {
+	let mut x = 0;
+	let mut y = 0;
+	let mut max_y = isize::MIN;
+
+	loop {
+		x += dx;
+		y += dy;
+
+		dx -= dx.signum();
+		dy -= 1;
+
+		if y > max_y {
+			max_y = y;
+		}
+
+		match (
+			x >= x_target_min && x <= x_target_max,
+			y >= y_target_min && y <= y_target_max,
+		) {
+			(true, true) => return Some(max_y),
+			(false, _) if dx == 0 => return None,
+			(_, false) if dy < 0 && y < y_target_min => return None,
+			_ => {}
+		}
+	}
 }
 
 advent::problem!(
