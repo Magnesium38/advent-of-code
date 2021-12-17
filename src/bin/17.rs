@@ -1,17 +1,9 @@
 use itertools::Itertools;
 
 fn pt1(input: &str) -> anyhow::Result<isize> {
-	let ((x_min, x_max), (y_min, y_max)) = get_bounds(input)?;
+	let (_, (y_min, _)) = get_bounds(input)?;
 
-	let mut starting_x_velocity = 0;
-	while (starting_x_velocity + 1) * (starting_x_velocity + 2) / 2 < x_max {
-		starting_x_velocity += 1;
-	}
-
-	(y_min..=y_min.abs().max(y_max))
-		.flat_map(|dy| is_valid_shot(starting_x_velocity, dy, x_min, x_max, y_min, y_max))
-		.max()
-		.ok_or(anyhow::anyhow!("no valid shots"))
+	Ok(y_min * (y_min + 1) / 2)
 }
 
 fn pt2(input: &str) -> anyhow::Result<usize> {
