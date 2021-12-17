@@ -31,7 +31,7 @@ fn pt2(input: &str) -> anyhow::Result<usize> {
 			}
 		});
 
-	valid.sort();
+	valid.sort_unstable();
 	valid.dedup();
 
 	Ok(valid.len())
