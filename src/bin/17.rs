@@ -50,27 +50,24 @@ fn is_valid_shot(
 	x_target_max: isize,
 	y_target_min: isize,
 	y_target_max: isize,
-) -> Option<isize> {
+) -> Option<()> {
 	let mut x = 0;
 	let mut y = 0;
-	let mut max_y = isize::MIN;
+
+	let (ddx, ddy) = (-dx.signum(), -1);
 
 	loop {
 		x += dx;
 		y += dy;
 
-		dx -= dx.signum();
-		dy -= 1;
-
-		if y > max_y {
-			max_y = y;
-		}
+		dx += ddx;
+		dy += ddy;
 
 		match (
 			x >= x_target_min && x <= x_target_max,
 			y >= y_target_min && y <= y_target_max,
 		) {
-			(true, true) => return Some(max_y),
+			(true, true) => return Some(()),
 			(false, _) if dx == 0 => return None,
 			(_, false) if dy < 0 && y < y_target_min => return None,
 			_ => {}
