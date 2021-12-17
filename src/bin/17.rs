@@ -2,17 +2,7 @@ use hashbrown::HashSet;
 use itertools::Itertools;
 
 fn pt1(input: &str) -> anyhow::Result<isize> {
-	let (_, input) = input.split_once(": ").unwrap();
-	let (x_range, y_range) = input.split_once(", ").unwrap();
-	let (_, x_range) = x_range.split_once("=").unwrap();
-	let (_, y_range) = y_range.split_once("=").unwrap();
-	let (x_min, x_max) = x_range.split_once("..").unwrap();
-	let (y_min, y_max) = y_range.split_once("..").unwrap();
-
-	let x_min = x_min.parse::<isize>()?;
-	let x_max = x_max.parse::<isize>()?;
-	let y_min = y_min.parse::<isize>()?;
-	let y_max = y_max.parse::<isize>()?;
+	let ((x_min, x_max), (y_min, y_max)) = get_bounds(input)?;
 
 	let mut starting_x_velocity = 0;
 	while (starting_x_velocity + 1) * (starting_x_velocity + 2) / 2 < x_max {
@@ -27,17 +17,7 @@ fn pt1(input: &str) -> anyhow::Result<isize> {
 }
 
 fn pt2(input: &str) -> anyhow::Result<usize> {
-	let (_, input) = input.split_once(": ").unwrap();
-	let (x_range, y_range) = input.split_once(", ").unwrap();
-	let (_, x_range) = x_range.split_once("=").unwrap();
-	let (_, y_range) = y_range.split_once("=").unwrap();
-	let (x_min, x_max) = x_range.split_once("..").unwrap();
-	let (y_min, y_max) = y_range.split_once("..").unwrap();
-
-	let x_min = x_min.parse::<isize>()?;
-	let x_max = x_max.parse::<isize>()?;
-	let y_min = y_min.parse::<isize>()?;
-	let y_max = y_max.parse::<isize>()?;
+	let ((x_min, x_max), (y_min, y_max)) = get_bounds(input)?;
 
 	let mut min_starting_x_velocity = 0;
 	while (min_starting_x_velocity) * (min_starting_x_velocity + 1) / 2 < x_min {
@@ -55,6 +35,20 @@ fn pt2(input: &str) -> anyhow::Result<usize> {
 		});
 
 	Ok(valid.len())
+}
+
+fn get_bounds(input: &str) -> anyhow::Result<((isize, isize), (isize, isize))> {
+	let (_, input) = input.split_once(": ").unwrap();
+	let (x_range, y_range) = input.split_once(", ").unwrap();
+	let (_, x_range) = x_range.split_once("=").unwrap();
+	let (_, y_range) = y_range.split_once("=").unwrap();
+	let (x_min, x_max) = x_range.split_once("..").unwrap();
+	let (y_min, y_max) = y_range.split_once("..").unwrap();
+
+	Ok((
+		(x_min.parse::<isize>()?, x_max.parse::<isize>()?),
+		(y_min.parse::<isize>()?, y_max.parse::<isize>()?),
+	))
 }
 
 fn is_valid_shot(
