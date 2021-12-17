@@ -54,14 +54,12 @@ fn is_valid_shot(
 	let mut x = 0;
 	let mut y = 0;
 
-	let (ddx, ddy) = (-dx.signum(), -1);
-
 	loop {
 		x += dx;
 		y += dy;
 
-		dx += ddx;
-		dy += ddy;
+		dx -= dx.signum();
+		dy -= 1;
 
 		match (
 			x >= x_target_min && x <= x_target_max,
