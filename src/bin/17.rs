@@ -1,4 +1,5 @@
 use hashbrown::HashSet;
+use itertools::Itertools;
 
 fn pt1(input: &str) -> anyhow::Result<isize> {
 	let (_, input) = input.split_once(": ").unwrap();
@@ -45,33 +46,13 @@ fn pt2(input: &str) -> anyhow::Result<usize> {
 	let max_starting_x_velocity = x_max;
 
 	let mut valid = HashSet::new();
-	for starting_x_velocity in min_starting_x_velocity..=max_starting_x_velocity {
-		for starting_y_velocity in y_min..10000 {
-			let mut position = (0, 0);
-			let mut x_velocity = starting_x_velocity;
-			let mut y_velocity = starting_y_velocity;
-
-			loop {
-				if position.0 > x_max || position.1 < y_min {
-					break;
-				}
-
-				position = (position.0 + x_velocity, position.1 + y_velocity);
-
-				x_velocity += -x_velocity.signum();
-				y_velocity -= 1;
-
-				if position.0 >= x_min
-					&& position.1 >= y_min
-					&& position.0 <= x_max
-					&& position.1 <= y_max
-				{
-					valid.insert((starting_x_velocity, starting_y_velocity));
-					break;
-				}
+	(min_starting_x_velocity..=max_starting_x_velocity)
+		.cartesian_product(y_min..1000)
+		.for_each(|(dx, dy)| {
+			if is_valid_shot(dx, dy, x_min, x_max, y_min, y_max).is_some() {
+				valid.insert((dx, dy));
 			}
-		}
-	}
+		});
 
 	Ok(valid.len())
 }
