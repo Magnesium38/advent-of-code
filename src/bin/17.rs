@@ -1,4 +1,3 @@
-use hashbrown::HashSet;
 use itertools::Itertools;
 
 fn pt1(input: &str) -> anyhow::Result<isize> {
@@ -10,8 +9,7 @@ fn pt1(input: &str) -> anyhow::Result<isize> {
 	}
 
 	(y_min..=y_min.abs().max(y_max))
-		.map(|dy| is_valid_shot(starting_x_velocity, dy, x_min, x_max, y_min, y_max))
-		.flatten()
+		.flat_map(|dy| is_valid_shot(starting_x_velocity, dy, x_min, x_max, y_min, y_max))
 		.max()
 		.ok_or(anyhow::anyhow!("no valid shots"))
 }
@@ -24,14 +22,17 @@ fn pt2(input: &str) -> anyhow::Result<usize> {
 		min_starting_x_velocity += 1;
 	}
 
-	let mut valid = HashSet::new();
+	let mut valid = Vec::new();
 	(min_starting_x_velocity..=x_max)
 		.cartesian_product(y_min..=y_min.abs().max(y_max))
 		.for_each(|(dx, dy)| {
 			if is_valid_shot(dx, dy, x_min, x_max, y_min, y_max).is_some() {
-				valid.insert((dx, dy));
+				valid.push((dx, dy));
 			}
 		});
+
+	valid.sort();
+	valid.dedup();
 
 	Ok(valid.len())
 }
