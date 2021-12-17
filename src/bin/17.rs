@@ -9,7 +9,7 @@ fn pt1(input: &str) -> anyhow::Result<isize> {
 		starting_x_velocity += 1;
 	}
 
-	(0..500)
+	(y_min..=y_min.abs().max(y_max))
 		.map(|dy| is_valid_shot(starting_x_velocity, dy, x_min, x_max, y_min, y_max))
 		.flatten()
 		.max()
@@ -23,11 +23,10 @@ fn pt2(input: &str) -> anyhow::Result<usize> {
 	while (min_starting_x_velocity) * (min_starting_x_velocity + 1) / 2 < x_min {
 		min_starting_x_velocity += 1;
 	}
-	let max_starting_x_velocity = x_max;
 
 	let mut valid = HashSet::new();
-	(min_starting_x_velocity..=max_starting_x_velocity)
-		.cartesian_product(y_min..1000)
+	(min_starting_x_velocity..=x_max)
+		.cartesian_product(y_min..=y_min.abs().max(y_max))
 		.for_each(|(dx, dy)| {
 			if is_valid_shot(dx, dy, x_min, x_max, y_min, y_max).is_some() {
 				valid.insert((dx, dy));
