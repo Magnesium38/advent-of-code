@@ -1,6 +1,5 @@
-use std::ops::Add;
-
 use itertools::Itertools;
+use std::ops::Add;
 
 fn pt1(input: &str) -> anyhow::Result<usize> {
 	input
@@ -14,15 +13,9 @@ fn pt1(input: &str) -> anyhow::Result<usize> {
 		})
 		.collect::<Result<Vec<_>, _>>()?
 		.into_iter()
-		.reduce(|acc, snailfish| {
-			let mut result = acc + snailfish;
-
-			result.reduce();
-
-			result
-		})
+		.reduce(|acc, snailfish| &acc + &snailfish)
 		.map(|snailfish| snailfish.magnitude())
-		.ok_or(anyhow::anyhow!("No snailfish found"))
+		.ok_or(anyhow::anyhow!("No magnitude found"))
 }
 
 fn pt2(input: &str) -> anyhow::Result<usize> {
@@ -38,27 +31,14 @@ fn pt2(input: &str) -> anyhow::Result<usize> {
 		.collect::<Result<Vec<_>, _>>()?
 		.into_iter()
 		.tuple_combinations::<(_, _)>()
-		.map(|(a, b)| {
-			let (mut a, mut b) = (&a + &b, &b + &a);
-
-			a.reduce();
-			b.reduce();
-
-			a.magnitude().max(b.magnitude())
-		})
+		.map(|(a, b)| (&a + &b).magnitude().max((&b + &a).magnitude()))
 		.max()
-		.ok_or(anyhow::anyhow!("No snailfish found"))
+		.ok_or(anyhow::anyhow!("No maximum found"))
 }
 
-#[derive(Clone, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq)]
 struct Snailfish {
 	numbers: Vec<(usize, usize)>,
-}
-
-impl std::fmt::Debug for Snailfish {
-	fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-		write!(f, "Snailfish {{ numbers: {:?} }}", self.numbers)
-	}
 }
 
 impl Snailfish {
@@ -69,7 +49,7 @@ impl Snailfish {
 		input.chars().for_each(|c| match c {
 			'[' => depth += 1,
 			']' => depth -= 1,
-			',' => (),
+			',' => {}
 			'0'..='9' => {
 				numbers.push((c.to_digit(10).unwrap() as usize, depth));
 			}
@@ -153,7 +133,7 @@ impl<'a, 'b> Add<&'b Snailfish> for &'a Snailfish {
 	type Output = Snailfish;
 
 	fn add(self, other: &'b Snailfish) -> Snailfish {
-		Snailfish {
+		let mut snailfish = Snailfish {
 			numbers: self
 				.numbers
 				.iter()
@@ -165,27 +145,11 @@ impl<'a, 'b> Add<&'b Snailfish> for &'a Snailfish {
 						.map(|(value, depth)| (*value, depth + 1)),
 				)
 				.collect(),
-		}
-	}
-}
+		};
 
-impl Add for Snailfish {
-	type Output = Snailfish;
+		snailfish.reduce();
 
-	fn add(self, other: Snailfish) -> Snailfish {
-		Snailfish {
-			numbers: self
-				.numbers
-				.into_iter()
-				.map(|(value, depth)| (value, depth + 1))
-				.chain(
-					other
-						.numbers
-						.into_iter()
-						.map(|(value, depth)| (value, depth + 1)),
-				)
-				.collect(),
-		}
+		snailfish
 	}
 }
 
