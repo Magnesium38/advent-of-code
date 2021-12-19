@@ -11,7 +11,7 @@ fn pt1(input: &str) -> anyhow::Result<usize> {
 				.lines()
 				.skip(1)
 				.map(|line| {
-					let (x, y, z) = line.split(",").collect_tuple::<(_, _, _)>().unwrap();
+					let (x, y, z) = line.split(',').collect_tuple::<(_, _, _)>().unwrap();
 
 					(
 						x.trim().parse::<isize>().unwrap(),
@@ -28,7 +28,7 @@ fn pt1(input: &str) -> anyhow::Result<usize> {
 		map.insert((x, y, z));
 	});
 
-	'outer: while scanners.len() > 0 {
+	'outer: while !scanners.is_empty() {
 		let scanner = scanners.remove(0);
 
 		for f in [
@@ -97,7 +97,7 @@ fn pt2(input: &str) -> anyhow::Result<isize> {
 				.lines()
 				.skip(1)
 				.map(|line| {
-					let (x, y, z) = line.split(",").collect_tuple::<(_, _, _)>().unwrap();
+					let (x, y, z) = line.split(',').collect_tuple::<(_, _, _)>().unwrap();
 
 					(
 						x.trim().parse::<isize>().unwrap(),
@@ -116,7 +116,7 @@ fn pt2(input: &str) -> anyhow::Result<isize> {
 
 	let mut scanner_positions = vec![(0, 0, 0); scanners.len()];
 
-	'outer: while scanners.len() > 0 {
+	'outer: while !scanners.is_empty() {
 		let scanner = scanners.remove(0);
 
 		for f in [
