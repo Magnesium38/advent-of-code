@@ -20,7 +20,7 @@ macro_rules! main {
 
 			println!("Part one: {}", pt1?);
 			println!("Part two: {}", pt2?);
-			println!("Duration: {}µs", elapsed.as_micros());
+			println!("Duration: {:?}", elapsed);
 
 			Ok(())
 		}
