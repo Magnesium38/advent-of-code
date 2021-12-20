@@ -27,27 +27,26 @@ pub fn pt2(input: &str) -> anyhow::Result<usize> {
 fn parse_input(input: &str) -> (Vec<bool>, advent::Grid<bool>) {
 	let (algorithm, input) = input.split_once("\n\n").unwrap();
 
-	let algorithm = algorithm
-		.chars()
-		.map(|c| match c {
-			'.' => false,
-			'#' => true,
-			_ => panic!("invalid character '{}'", c),
-		})
-		.collect_vec();
-
-	let image: advent::Grid<bool> = input
-		.lines()
-		.map(|line| {
-			line.chars().map(|c| match c {
+	(
+		algorithm
+			.chars()
+			.map(|c| match c {
 				'.' => false,
 				'#' => true,
-				_ => panic!("invalid character"),
+				_ => panic!("invalid character '{}'", c),
 			})
-		})
-		.into();
-
-	(algorithm, image)
+			.collect_vec(),
+		input
+			.lines()
+			.map(|line| {
+				line.chars().map(|c| match c {
+					'.' => false,
+					'#' => true,
+					_ => panic!("invalid character"),
+				})
+			})
+			.into(),
+	)
 }
 
 fn enhance(
@@ -77,17 +76,12 @@ fn enhance(
 				(0, 1),
 				(1, 1),
 			] {
-				bit = bit << 1;
-				match map.get(x + dx, y + dy) {
-					Some(true) => {
-						bit += 1;
-					}
-					Some(false) => {}
-					None if default => {
-						bit += 1;
-					}
-					_ => {}
-				}
+				bit = (bit << 1)
+					+ match map.get(x + dx, y + dy) {
+						Some(true) => 1,
+						None if default => 1,
+						_ => 0,
+					};
 			}
 
 			new_grid.insert(x, y, algorithm[bit]);
