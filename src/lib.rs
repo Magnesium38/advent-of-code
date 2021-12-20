@@ -5,9 +5,13 @@ pub use grid::{Grid, Neighbors, Iter};
 #[macro_export]
 macro_rules! main {
 	() => {
-		fn main() -> anyhow::Result<()> {
-			let mut filepath = std::env::current_dir()?;
-			filepath.push(file!().replace(".rs", ".txt").replace("src/bin/", "input/"));
+		pub fn main() -> anyhow::Result<()> {
+			let filename = file!().replace(".rs", ".txt");
+			let filename = filename.split("/").last().unwrap();
+			let directory = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+
+			let mut filepath = directory.join(format!("../input/{}", filename));
+			filepath = filepath.canonicalize()?;
 
 			let input = std::fs::read_to_string(filepath)?;
 			let input = input.trim();

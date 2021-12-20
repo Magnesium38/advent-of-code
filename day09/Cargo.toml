@@ -1,22 +1,16 @@
 [package]
-name = "advent"
+name = "day09"
 version = "0.1.0"
 edition = "2021"
-default-run = "advent"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
-[workspace]
-members = [
-	"benchmark",
-	"template",
-	"day*",
-]
+[lib]
+path = "src/09.rs"
+doctest = false
 
 [dependencies]
 anyhow = "1.0.51"
-dotenv = "0.15.0"
+advent = { path = "../" }
 hashbrown = "0.11.2"
 itertools = "0.10.1"
-reqwest = { version = "0.11.7", features = ["blocking"] }
-retain_mut = "0.1.5"
