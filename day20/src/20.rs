@@ -27,12 +27,11 @@ pub fn pt1(input: &str) -> anyhow::Result<usize> {
 		})
 		.collect_vec();
 
-	print_map(&image);
-
-	image = enhance(image, &algorithm, false);
-	print_map(&image);
-	image = enhance(image, &algorithm, true);
-	print_map(&image);
+	let toggle = *algorithm.first().unwrap();
+	for _ in 0..1 {
+		image = enhance(image, &algorithm, toggle && false);
+		image = enhance(image, &algorithm, toggle && true);
+	}
 
 	Ok(image.iter().filter(|(_, &v)| v).count())
 }
@@ -63,37 +62,13 @@ pub fn pt2(input: &str) -> anyhow::Result<usize> {
 		})
 		.collect_vec();
 
-	for i in 0..25 {
-		dbg!(i);
-
-		image = enhance(image, &algorithm, false);
-		image = enhance(image, &algorithm, true);
+	let toggle = *algorithm.first().unwrap();
+	for _ in 0..25 {
+		image = enhance(image, &algorithm, toggle && false);
+		image = enhance(image, &algorithm, toggle && true);
 	}
 
 	Ok(image.iter().filter(|(_, &v)| v).count())
-}
-
-fn print_map(map: &HashMap<(isize, isize), bool>) {
-	let min_x = map.keys().map(|&(x, _)| x).min().unwrap();
-	let max_x = map.keys().map(|&(x, _)| x).max().unwrap();
-	let min_y = map.keys().map(|&(_, y)| y).min().unwrap();
-	let max_y = map.keys().map(|&(_, y)| y).max().unwrap();
-
-	let mut output = String::new();
-
-	for y in min_y - 1..=max_y + 1 {
-		for x in min_x - 1..=max_x + 1 {
-			output.push(if *map.get(&(y, x)).unwrap_or(&false) {
-				'#'
-			} else {
-				'.'
-			});
-		}
-
-		output.push('\n');
-	}
-
-	println!("\n{}\n", output);
 }
 
 fn enhance(
@@ -108,9 +83,10 @@ fn enhance(
 	let min_y = map.keys().map(|&(_, y)| y).min().unwrap();
 	let max_y = map.keys().map(|&(_, y)| y).max().unwrap();
 
-	for x in min_x - 1..=max_x + 1 {
-		for y in min_y - 1..=max_y + 1 {
+	for x in min_x - 2..=max_x + 2 {
+		for y in min_y - 2..=max_y + 2 {
 			let mut bit: usize = 0;
+
 
 			for (dx, dy) in &[
 				(-1, -1),
