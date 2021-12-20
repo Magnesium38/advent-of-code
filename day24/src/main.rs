@@ -1,4 +1,4 @@
-use dayadvent_day::main as advent_main;
+use day24::main as advent_main;
 
 fn main() -> anyhow::Result<()> {
 	advent_main()

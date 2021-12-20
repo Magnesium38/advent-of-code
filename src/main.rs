@@ -29,7 +29,7 @@ fn main() -> anyhow::Result<()> {
 		&filename,
 	)?;
 	copy_file(
-		"template/src/ADVENTDAY.rs",
+		"template/src/advent_day.rs",
 		&format!("day{}/src/{}.rs", filename, filename),
 		&filename,
 	)?;
@@ -64,7 +64,7 @@ fn copy_file(src: &str, dst: &str, replace_with: &str) -> anyhow::Result<()> {
 	let dst_path = current_dir()?.join(dst);
 
 	if !dst_path.exists() {
-		let contents = read_to_string(src_path)?.replace("ADVENTDAY", replace_with);
+		let contents = read_to_string(src_path)?.replace("advent_day", replace_with);
 
 		File::create(dst_path)?.write_all(contents.as_bytes())?;
 	}
