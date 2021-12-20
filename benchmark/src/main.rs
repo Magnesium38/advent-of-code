@@ -4,7 +4,7 @@ extern crate prettytable;
 use prettytable::{Cell, Row, Table};
 use std::time::Duration;
 
-const RUNS: u32 = 20;
+const RUNS: u32 = 100;
 
 fn main() -> anyhow::Result<()> {
 	let jobs = [
@@ -27,18 +27,19 @@ fn main() -> anyhow::Result<()> {
 		(wrap_fn(&day17::pt1), wrap_fn(&day17::pt2), "17"),
 		(wrap_fn(&day18::pt1), wrap_fn(&day18::pt2), "18"),
 		(wrap_fn(&day19::pt1), wrap_fn(&day19::pt2), "19"),
-		// (wrap_fn(&day20::pt1), wrap_fn(&day20::pt2), "20"),
-		// (wrap_fn(&day21::pt1), wrap_fn(&day21::pt2), "21"),
-		// (wrap_fn(&day22::pt1), wrap_fn(&day22::pt2), "22"),
-		// (wrap_fn(&day23::pt1), wrap_fn(&day23::pt2), "23"),
-		// (wrap_fn(&day24::pt1), wrap_fn(&day24::pt2), "24"),
-		// (wrap_fn(&day25::pt1), wrap_fn(&day25::pt2), "25"),
+		(wrap_fn(&day20::pt1), wrap_fn(&day20::pt2), "20"),
+		(wrap_fn(&day21::pt1), wrap_fn(&day21::pt2), "21"),
+		(wrap_fn(&day22::pt1), wrap_fn(&day22::pt2), "22"),
+		(wrap_fn(&day23::pt1), wrap_fn(&day23::pt2), "23"),
+		(wrap_fn(&day24::pt1), wrap_fn(&day24::pt2), "24"),
+		(wrap_fn(&day25::pt1), wrap_fn(&day25::pt2), "25"),
 	];
 
 	let results = jobs
 		.iter()
 		.map(|(pt1, pt2, day)| {
-			let input = std::fs::read_to_string(format!("input/{}.txt", day)).unwrap();
+			let input =
+				std::fs::read_to_string(format!("input/{}.txt", day)).unwrap_or("".to_string());
 			let input = input.trim();
 
 			println!("benchmarking day {}", day);
@@ -52,23 +53,61 @@ fn main() -> anyhow::Result<()> {
 		.collect::<anyhow::Result<Vec<_>>>()?;
 
 	let mut table = Table::new();
-
-	table.add_row(row![
-		"day", "pt1_min", "pt1_max", "pt1_avg", "pt2_min", "pt2_max", "pt2_avg",
+	table.set_titles(row![
+		c =>
+		"Day",
+		"Min (1)",
+		"Max (1)",
+		"Avg (1)",
+		"Percent (1)",
+		"Min (2)",
+		"Max (2)",
+		"Avg (2)",
+		"Percent (2)",
 	]);
+
+	let pt1_total = results
+		.iter()
+		.map(|(_, (_, _, pt1_avg), _)| pt1_avg)
+		.sum::<u128>();
+
+	let pt2_total = results
+		.iter()
+		.map(|(_, _, (_, _, pt2_avg))| pt2_avg)
+		.sum::<u128>();
 
 	for result in results
 		.iter()
 		.map(
-			|(day, (pt1_min, pt1_max, pt1_avg), (pt2_min, pt2_max, pt2_avg))| {
+			|&(day, (pt1_min, pt1_max, pt1_avg), (pt2_min, pt2_max, pt2_avg))| {
 				Ok(vec![
 					Cell::new(&day.to_string()),
-					Cell::new(&format!("{:?}", pt1_min)),
-					Cell::new(&format!("{:?}", pt1_max)),
-					Cell::new(&format!("{:?}", pt1_avg)),
-					Cell::new(&format!("{:?}", pt2_min)),
-					Cell::new(&format!("{:?}", pt2_max)),
-					Cell::new(&format!("{:?}", pt2_avg)),
+					make_cell(pt1_min),
+					make_cell(pt1_max),
+					make_cell(pt1_avg),
+					{
+						let mut cell = Cell::new(&format!(
+							"{:.4}%",
+							pt1_avg as f64 / pt1_total as f64 * 100.0,
+						));
+
+						cell.align(prettytable::format::Alignment::RIGHT);
+
+						cell
+					},
+					make_cell(pt2_min),
+					make_cell(pt2_max),
+					make_cell(pt2_avg),
+					{
+						let mut cell = Cell::new(&format!(
+							"{:.4}%",
+							pt2_avg as f64 / pt1_total as f64 * 100.0,
+						));
+
+						cell.align(prettytable::format::Alignment::RIGHT);
+
+						cell
+					},
 				])
 			},
 		)
@@ -77,17 +116,16 @@ fn main() -> anyhow::Result<()> {
 		table.add_row(Row::new(result));
 	}
 
-	let pt1_avg = results
-		.iter()
-		.map(|(_, (_, _, pt1_avg), _)| pt1_avg)
-		.sum::<Duration>();
-
-	let pt2_avg = results
-		.iter()
-		.map(|(_, _, (_, _, pt2_avg))| pt2_avg)
-		.sum::<Duration>();
 	table.add_row(row![
-		"summation", "", "", format!("{:?}", pt1_avg), "", "", format!("{:?}", pt2_avg),
+		"Total",
+		"",
+		"",
+		make_cell(pt1_total),
+		"",
+		"",
+		"",
+		make_cell(pt2_total),
+		"",
 	]);
 
 	table.printstd();
@@ -105,10 +143,18 @@ fn wrap_fn<T>(
 	})
 }
 
+fn make_cell(v: u128) -> Cell {
+	let mut cell = Cell::new(&format!("{:.4}ms", (v as f64) / 1_000_000.0));
+
+	cell.align(prettytable::format::Alignment::RIGHT);
+
+	cell
+}
+
 fn benchmark_function<T>(
 	f: &dyn Fn(&str) -> Result<T, anyhow::Error>,
 	input: &str,
-) -> anyhow::Result<(Duration, Duration, Duration)> {
+) -> anyhow::Result<(u128, u128, u128)> {
 	let durations = (0..RUNS)
 		.map(|_| {
 			let now = std::time::Instant::now();
@@ -123,5 +169,5 @@ fn benchmark_function<T>(
 	let max = durations.iter().max().unwrap();
 	let avg = durations.iter().sum::<Duration>() / RUNS;
 
-	Ok((*min, *max, avg))
+	Ok((min.as_nanos(), max.as_nanos(), avg.as_nanos()))
 }
