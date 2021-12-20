@@ -1,3 +1,4 @@
+#[derive(Debug)]
 pub struct Grid<T> {
 	pub width: usize,
 	pub height: usize,
@@ -51,6 +52,72 @@ where
 	}
 }
 
+impl<T: Default + Clone> Grid<T> {
+	pub fn new_with_size(width: usize, height: usize) -> Self {
+		Grid {
+			width,
+			height,
+			cells: vec![T::default(); width * height],
+		}
+	}
+
+	pub fn add_empty_row(&mut self, row: usize) {
+		match self.index(0, row as isize) {
+			Some(index) => {
+				self.cells
+					.splice(index..index, vec![T::default(); self.width]);
+			}
+			None => {
+				self.cells.extend(vec![T::default(); self.width]);
+			}
+		}
+
+		self.height += 1;
+	}
+
+	pub fn add_empty_column(&mut self, column: usize) {
+		for row in (0..self.height).rev() {
+			let index = row * self.width + column;
+
+			if index > self.cells.len() {
+				self.cells.push(T::default());
+			} else {
+				self.cells.insert(index, T::default());
+			}
+		}
+
+		self.width += 1;
+	}
+
+	pub fn add_row(&mut self, row: usize, value: T) {
+		match self.index(0, row as isize) {
+			Some(index) => {
+				self.cells.splice(index..index, vec![value; self.width]);
+			}
+			None => {
+				self.cells.extend(vec![value; self.width]);
+			}
+		}
+
+		self.height += 1;
+	}
+
+	pub fn add_column(&mut self, column: usize, value: T) {
+		for row in (0..self.height).rev() {
+			let value = value.clone();
+			let index = row * self.width + column;
+
+			if index > self.cells.len() {
+				self.cells.push(value);
+			} else {
+				self.cells.insert(index, value);
+			}
+		}
+
+		self.width += 1;
+	}
+}
+
 impl<T> Grid<T> {
 	fn index(&self, x: isize, y: isize) -> Option<usize> {
 		if x < 0 || y < 0 || x >= self.width as isize || y >= self.height as isize {
@@ -75,6 +142,11 @@ impl<T> Grid<T> {
 
 	pub fn get_mut(&mut self, x: isize, y: isize) -> Option<&mut T> {
 		self.index(x, y).map(|index| &mut self.cells[index])
+	}
+
+	pub fn insert(&mut self, x: isize, y: isize, v: T) {
+		let i = self.index(x, y).unwrap();
+		self.cells[i] = v;
 	}
 
 	pub fn neighbors(&self, x: isize, y: isize) -> Neighbors<T> {

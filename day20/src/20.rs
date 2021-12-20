@@ -1,31 +1,7 @@
-use hashbrown::HashMap;
 use itertools::Itertools;
 
 pub fn pt1(input: &str) -> anyhow::Result<usize> {
-	let (algorithm, input) = input.split_once("\n\n").unwrap();
-
-	let mut image: HashMap<(isize, isize), bool> =
-		HashMap::from_iter(input.lines().enumerate().flat_map(|(i, line)| {
-			line.chars().enumerate().map(move |(j, c)| {
-				(
-					(i as isize, j as isize),
-					match c {
-						'.' => false,
-						'#' => true,
-						_ => panic!("invalid character"),
-					},
-				)
-			})
-		}));
-
-	let algorithm = algorithm
-		.chars()
-		.map(|c| match c {
-			'.' => false,
-			'#' => true,
-			_ => panic!("invalid character '{}'", c),
-		})
-		.collect_vec();
+	let (algorithm, mut image) = parse_input(input);
 
 	let toggle = *algorithm.first().unwrap();
 	for _ in 0..1 {
@@ -37,30 +13,7 @@ pub fn pt1(input: &str) -> anyhow::Result<usize> {
 }
 
 pub fn pt2(input: &str) -> anyhow::Result<usize> {
-	let (algorithm, input) = input.split_once("\n\n").unwrap();
-
-	let mut image: HashMap<(isize, isize), bool> =
-		HashMap::from_iter(input.lines().enumerate().flat_map(|(i, line)| {
-			line.chars().enumerate().map(move |(j, c)| {
-				(
-					(i as isize, j as isize),
-					match c {
-						'.' => false,
-						'#' => true,
-						_ => panic!("invalid character"),
-					},
-				)
-			})
-		}));
-
-	let algorithm = algorithm
-		.chars()
-		.map(|c| match c {
-			'.' => false,
-			'#' => true,
-			_ => panic!("invalid character '{}'", c),
-		})
-		.collect_vec();
+	let (algorithm, mut image) = parse_input(input);
 
 	let toggle = *algorithm.first().unwrap();
 	for _ in 0..25 {
@@ -71,38 +24,61 @@ pub fn pt2(input: &str) -> anyhow::Result<usize> {
 	Ok(image.iter().filter(|(_, &v)| v).count())
 }
 
+fn parse_input(input: &str) -> (Vec<bool>, advent::Grid<bool>) {
+	let (algorithm, input) = input.split_once("\n\n").unwrap();
+
+	let algorithm = algorithm
+		.chars()
+		.map(|c| match c {
+			'.' => false,
+			'#' => true,
+			_ => panic!("invalid character '{}'", c),
+		})
+		.collect_vec();
+
+	let image: advent::Grid<bool> = input
+		.lines()
+		.map(|line| {
+			line.chars().map(|c| match c {
+				'.' => false,
+				'#' => true,
+				_ => panic!("invalid character"),
+			})
+		})
+		.into();
+
+	(algorithm, image)
+}
+
 fn enhance(
-	map: HashMap<(isize, isize), bool>,
+	mut map: advent::Grid<bool>,
 	algorithm: &Vec<bool>,
 	default: bool,
-) -> HashMap<(isize, isize), bool> {
-	let mut new_map = HashMap::new();
+) -> advent::Grid<bool> {
+	map.add_row(0, default);
+	map.add_row(map.height, default);
+	map.add_column(0, default);
+	map.add_column(map.width, default);
 
-	let min_x = map.keys().map(|&(x, _)| x).min().unwrap();
-	let max_x = map.keys().map(|&(x, _)| x).max().unwrap();
-	let min_y = map.keys().map(|&(_, y)| y).min().unwrap();
-	let max_y = map.keys().map(|&(_, y)| y).max().unwrap();
+	let mut new_grid = advent::Grid::new_with_size(map.width, map.height);
 
-	for x in min_x - 2..=max_x + 2 {
-		for y in min_y - 2..=max_y + 2 {
+	for x in 0..(map.width as isize) {
+		for y in 0..(map.height as isize) {
 			let mut bit: usize = 0;
-
 
 			for (dx, dy) in &[
 				(-1, -1),
-				(-1, 0),
-				(-1, 1),
 				(0, -1),
-				(0, 0),
-				(0, 1),
 				(1, -1),
+				(-1, 0),
+				(0, 0),
 				(1, 0),
+				(-1, 1),
+				(0, 1),
 				(1, 1),
 			] {
-				let new_pos = (x + dx, y + dy);
-
 				bit = bit << 1;
-				match map.get(&new_pos) {
+				match map.get(x + dx, y + dy) {
 					Some(true) => {
 						bit += 1;
 					}
@@ -114,11 +90,11 @@ fn enhance(
 				}
 			}
 
-			new_map.insert((x, y), algorithm[bit]);
+			new_grid.insert(x, y, algorithm[bit]);
 		}
 	}
 
-	new_map
+	new_grid
 }
 
 advent::problem!(
