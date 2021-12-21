@@ -13,6 +13,10 @@ members = [
 	"day*",
 ]
 
+[profile.release]
+codegen-units=1
+lto="fat"
+
 [dependencies]
 anyhow = "1.0.51"
 dotenv = "0.15.0"

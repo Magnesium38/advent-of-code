@@ -2,92 +2,14 @@ use hashbrown::HashSet;
 use itertools::Itertools;
 
 pub fn pt1(input: &str) -> anyhow::Result<usize> {
-	let mut map = HashSet::new();
-
-	let mut scanners = input
-		.split("\n\n")
-		.map(|scanner| {
-			scanner
-				.lines()
-				.skip(1)
-				.map(|line| {
-					let (x, y, z) = line.split(',').collect_tuple::<(_, _, _)>().unwrap();
-
-					(
-						x.trim().parse::<isize>().unwrap(),
-						y.trim().parse::<isize>().unwrap(),
-						z.trim().parse::<isize>().unwrap(),
-					)
-				})
-				.collect_vec()
-		})
-		.collect_vec();
-
-	let scanner = scanners.remove(0);
-	scanner.iter().for_each(|&(x, y, z)| {
-		map.insert((x, y, z));
-	});
-
-	'outer: while !scanners.is_empty() {
-		let scanner = scanners.remove(0);
-
-		for f in [
-			|(x, y, z): (isize, isize, isize)| (x, y, z),
-			|(x, y, z): (isize, isize, isize)| (y, z, x),
-			|(x, y, z): (isize, isize, isize)| (z, x, y),
-			|(x, y, z): (isize, isize, isize)| (z, y, -x),
-			|(x, y, z): (isize, isize, isize)| (y, x, -z),
-			|(x, y, z): (isize, isize, isize)| (x, z, -y),
-			|(x, y, z): (isize, isize, isize)| (x, -y, -z),
-			|(x, y, z): (isize, isize, isize)| (y, -z, -x),
-			|(x, y, z): (isize, isize, isize)| (z, -x, -y),
-			|(x, y, z): (isize, isize, isize)| (z, -y, x),
-			|(x, y, z): (isize, isize, isize)| (y, -x, z),
-			|(x, y, z): (isize, isize, isize)| (x, -z, y),
-			|(x, y, z): (isize, isize, isize)| (-x, y, -z),
-			|(x, y, z): (isize, isize, isize)| (-y, z, -x),
-			|(x, y, z): (isize, isize, isize)| (-z, x, -y),
-			|(x, y, z): (isize, isize, isize)| (-z, y, x),
-			|(x, y, z): (isize, isize, isize)| (-y, x, z),
-			|(x, y, z): (isize, isize, isize)| (-x, z, y),
-			|(x, y, z): (isize, isize, isize)| (-x, -y, z),
-			|(x, y, z): (isize, isize, isize)| (-y, -z, x),
-			|(x, y, z): (isize, isize, isize)| (-z, -x, y),
-			|(x, y, z): (isize, isize, isize)| (-z, -y, -x),
-			|(x, y, z): (isize, isize, isize)| (-y, -x, -z),
-			|(x, y, z): (isize, isize, isize)| (-x, -z, -y),
-		] {
-			let points = scanner.iter().map(|&(x, y, z)| f((x, y, z))).collect_vec();
-
-			for scanner_point in &points {
-				for map_point in &map {
-					let delta = (
-						map_point.0 - scanner_point.0,
-						map_point.1 - scanner_point.1,
-						map_point.2 - scanner_point.2,
-					);
-
-					let reoriented_scanner_points: HashSet<_> = points
-						.iter()
-						.map(|&(x, y, z)| (x + delta.0, y + delta.1, z + delta.2))
-						.collect::<HashSet<_>>();
-
-					if map.intersection(&reoriented_scanner_points).count() >= 12 {
-						map.extend(&reoriented_scanner_points);
-
-						continue 'outer;
-					}
-				}
-			}
-		}
-
-		scanners.push(scanner);
-	}
-
-	Ok(map.len())
+	solve(input).map(|(count, _)| count)
 }
 
 pub fn pt2(input: &str) -> anyhow::Result<isize> {
+	solve(input).map(|(_, max)| max)
+}
+
+fn solve(input: &str) -> anyhow::Result<(usize, isize)> {
 	let mut map = HashSet::new();
 
 	let mut scanners = input
@@ -115,9 +37,34 @@ pub fn pt2(input: &str) -> anyhow::Result<isize> {
 	});
 
 	let mut scanner_positions = vec![(0, 0, 0); scanners.len()];
+	let mut distances = map
+		.iter()
+		.tuple_combinations::<(_, _)>()
+		.map(|((x1, y1, z1), (x2, y2, z2))| (x2 - x1).pow(2) + (y2 - y1).pow(2) + (z2 - z1).pow(2))
+		.collect_vec();
 
 	'outer: while !scanners.is_empty() {
 		let scanner = scanners.remove(0);
+
+		let beacon_distances = scanner
+			.iter()
+			.map(|&(x, y, z)| (x, y, z))
+			.tuple_combinations::<(_, _)>()
+			.map(|((x1, y1, z1), (x2, y2, z2))| {
+				(x2 - x1).pow(2) + (y2 - y1).pow(2) + (z2 - z1).pow(2)
+			})
+			.collect_vec();
+
+		let matching_distances = beacon_distances
+			.iter()
+			.cartesian_product(&distances)
+			.filter(|&(d1, d2)| d1 == d2)
+			.count();
+
+		if matching_distances < 66 {
+			scanners.push(scanner);
+			continue;
+		}
 
 		for f in [
 			|(x, y, z): (isize, isize, isize)| (x, y, z),
@@ -155,14 +102,25 @@ pub fn pt2(input: &str) -> anyhow::Result<isize> {
 						map_point.2 - scanner_point.2,
 					);
 
-					let reoriented_scanner_points: HashSet<_> = points
+					let reoriented_scanner_points = points
 						.iter()
-						.map(|&(x, y, z)| (x + delta.0, y + delta.1, z + delta.2))
-						.collect::<HashSet<_>>();
+						.map(|&(x, y, z)| (x + delta.0, y + delta.1, z + delta.2));
 
-					if map.intersection(&reoriented_scanner_points).count() >= 12 {
-						map.extend(&reoriented_scanner_points);
+					if reoriented_scanner_points
+						.clone()
+						.filter(|v| map.contains(v))
+						.count() >= 12
+					{
+						map.extend(reoriented_scanner_points);
 						scanner_positions.push(delta);
+
+						distances = map
+							.iter()
+							.tuple_combinations::<(_, _)>()
+							.map(|((x1, y1, z1), (x2, y2, z2))| {
+								(x2 - x1).pow(2) + (y2 - y1).pow(2) + (z2 - z1).pow(2)
+							})
+							.collect_vec();
 
 						continue 'outer;
 					}
@@ -178,6 +136,7 @@ pub fn pt2(input: &str) -> anyhow::Result<isize> {
 		.tuple_combinations()
 		.map(|((x1, y1, z1), (x2, y2, z2))| (x1 - x2).abs() + (y1 - y2).abs() + (z1 - z2).abs())
 		.max()
+		.map(|max| (map.len(), max))
 		.ok_or(anyhow::anyhow!("no solution found"))
 }
 
