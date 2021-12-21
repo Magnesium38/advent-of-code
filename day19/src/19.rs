@@ -1,4 +1,6 @@
-use hashbrown::HashSet;
+use std::ops::{Add, Sub};
+
+use hashbrown::{HashMap, HashSet};
 use itertools::Itertools;
 
 pub fn pt1(input: &str) -> anyhow::Result<usize> {
@@ -8,6 +10,68 @@ pub fn pt1(input: &str) -> anyhow::Result<usize> {
 pub fn pt2(input: &str) -> anyhow::Result<isize> {
 	solve(input).map(|(_, max)| max)
 }
+
+#[derive(Clone, Copy, PartialEq, Eq, Hash)]
+struct Vector3<T> {
+	x: T,
+	y: T,
+	z: T,
+}
+
+impl<T: std::fmt::Debug> std::fmt::Debug for Vector3<T> {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+		write!(f, "({:?}, {:?}, {:?})", self.x, self.y, self.z)
+	}
+}
+
+impl<T> Vector3<T> {
+	fn new(x: T, y: T, z: T) -> Self {
+		Self { x, y, z }
+	}
+}
+
+impl<T: Add<Output = T>> Add for Vector3<T> {
+	type Output = Self;
+
+	fn add(self, other: Self) -> Self::Output {
+		Self {
+			x: self.x + other.x,
+			y: self.y + other.y,
+			z: self.z + other.z,
+		}
+	}
+}
+
+impl<T: Sub<Output = T>> Sub for Vector3<T> {
+	type Output = Self;
+
+	fn sub(self, other: Self) -> Self::Output {
+		Self {
+			x: self.x - other.x,
+			y: self.y - other.y,
+			z: self.z - other.z,
+		}
+	}
+}
+
+impl<'a, T: Add<Output = T> + Copy> Add for &'a Vector3<T> {
+	type Output = Vector3<T>;
+
+	fn add(self, other: Self) -> Self::Output {
+		Vector3::new(self.x + other.x, self.y + other.y, self.z + other.z)
+	}
+}
+
+impl<'a, T: Sub<Output = T> + Copy> Sub for &'a Vector3<T> {
+	type Output = Vector3<T>;
+
+	fn sub(self, other: Self) -> Self::Output {
+		Vector3::new(self.x - other.x, self.y - other.y, self.z - other.z)
+	}
+}
+
+type Point = Vector3<isize>;
+type Fingerprint = (isize, isize);
 
 fn solve(input: &str) -> anyhow::Result<(usize, isize)> {
 	let mut map = HashSet::new();
@@ -21,7 +85,7 @@ fn solve(input: &str) -> anyhow::Result<(usize, isize)> {
 				.map(|line| {
 					let (x, y, z) = line.split(',').collect_tuple::<(_, _, _)>().unwrap();
 
-					(
+					Vector3::new(
 						x.trim().parse::<isize>().unwrap(),
 						y.trim().parse::<isize>().unwrap(),
 						z.trim().parse::<isize>().unwrap(),
@@ -30,130 +94,170 @@ fn solve(input: &str) -> anyhow::Result<(usize, isize)> {
 				.collect_vec()
 		})
 		.map(|scanner| {
-			let distances = scanner
+			let fingerprints = scanner
 				.iter()
 				.tuple_combinations::<(_, _)>()
-				.map(|((x1, y1, z1), (x2, y2, z2))| {
-					(x2 - x1).pow(2) + (y2 - y1).pow(2) + (z2 - z1).pow(2)
-				})
+				.map(|(p1, p2)| (fingerprint(p1, p2), (*p1, *p2)))
 				.collect_vec();
 
-			(scanner, distances)
+			(scanner, fingerprints)
 		})
 		.collect_vec();
 
-	let (scanner, mut distances) = scanners.remove(0);
-	scanner.iter().for_each(|&(x, y, z)| {
-		map.insert((x, y, z));
+	let mut fingerprints: HashMap<Fingerprint, Vec<(Point, Point)>> = HashMap::new();
+
+	let (scanner, scanner_fingerprints) = scanners.remove(0);
+	scanner.iter().for_each(|&point| {
+		map.insert(point);
 	});
 
-	let mut scanner_positions = Vec::with_capacity(scanners.len());
+	scanner_fingerprints
+		.iter()
+		.for_each(|&(fingerprint, (p1, p2))| {
+			fingerprints.entry(fingerprint).or_default().push((p1, p2));
+		});
 
-	sort_scanners(&mut scanners, &distances);
+	let mut scanner_positions = Vec::with_capacity(scanners.len());
+	scanner_positions.push(Vector3::new(0, 0, 0));
 
 	while !scanners.is_empty() {
-		let (scanner, beacon_distances) = scanners.remove(0);
+		let (scanner, scanner_fingerprints) = scanners.remove(0);
 
-		if beacon_distances
-			.iter()
-			.cartesian_product(&distances)
-			.filter(|(d1, d2)| d1 == d2)
-			.count() < 66
+		if let Some(delta) = merge_scanner(&mut map, &fingerprints, &scanner, &scanner_fingerprints)
 		{
-			scanners.push((scanner, beacon_distances));
-			continue;
-		}
+			scanner_positions.push(delta);
 
-		if let Some(position) = merge_scanner(&mut map, &scanner) {
-			scanner_positions.push(position);
-
-			distances = map
-				.iter()
-				.tuple_combinations::<(_, _)>()
-				.map(|((x1, y1, z1), (x2, y2, z2))| {
-					(x2 - x1).pow(2) + (y2 - y1).pow(2) + (z2 - z1).pow(2)
-				})
-				.collect_vec();
+			for (fingerprint, (p1, p2)) in scanner_fingerprints {
+				fingerprints.entry(fingerprint).or_default().push((p1, p2));
+			}
 		} else {
-			scanners.push((scanner, beacon_distances));
+			scanners.push((scanner, scanner_fingerprints));
 		}
 	}
 
 	scanner_positions
 		.iter()
 		.tuple_combinations()
-		.map(|((x1, y1, z1), (x2, y2, z2))| (x1 - x2).abs() + (y1 - y2).abs() + (z1 - z2).abs())
+		.map(
+			|(
+				Vector3 {
+					x: x1,
+					y: y1,
+					z: z1,
+				},
+				Vector3 {
+					x: x2,
+					y: y2,
+					z: z2,
+				},
+			)| (x1 - x2).abs() + (y1 - y2).abs() + (z1 - z2).abs(),
+		)
 		.max()
 		.map(|max| (map.len(), max))
 		.ok_or(anyhow::anyhow!("no solution found"))
 }
 
-fn sort_scanners(
-	scanners: &mut Vec<(Vec<(isize, isize, isize)>, Vec<isize>)>,
-	distances: &[isize],
-) {
-	scanners.sort_by(|(_, d1), (_, d2)| {
-		d2.iter()
-			.cartesian_product(distances)
-			.filter(|(d1, d2)| d1 == d2)
-			.count()
-			.cmp(
-				&d1.iter()
-					.cartesian_product(distances)
-					.filter(|(d1, d2)| d1 == d2)
-					.count(),
-			)
-	});
+fn fingerprint(p1: &Point, p2: &Point) -> Fingerprint {
+	let delta = p2 - p1;
+
+	(
+		delta.x.pow(2) + delta.y.pow(2) + delta.z.pow(2),
+		delta.x.abs().max(delta.y.abs().max(delta.z.abs())),
+	)
 }
 
 fn merge_scanner(
-	map: &mut HashSet<(isize, isize, isize)>,
-	scanner: &[(isize, isize, isize)],
-) -> Option<(isize, isize, isize)> {
-	for f in [
-		|(x, y, z): (isize, isize, isize)| (x, y, z),
-		|(x, y, z): (isize, isize, isize)| (y, z, x),
-		|(x, y, z): (isize, isize, isize)| (z, x, y),
-		|(x, y, z): (isize, isize, isize)| (z, y, -x),
-		|(x, y, z): (isize, isize, isize)| (y, x, -z),
-		|(x, y, z): (isize, isize, isize)| (x, z, -y),
-		|(x, y, z): (isize, isize, isize)| (x, -y, -z),
-		|(x, y, z): (isize, isize, isize)| (y, -z, -x),
-		|(x, y, z): (isize, isize, isize)| (z, -x, -y),
-		|(x, y, z): (isize, isize, isize)| (z, -y, x),
-		|(x, y, z): (isize, isize, isize)| (y, -x, z),
-		|(x, y, z): (isize, isize, isize)| (x, -z, y),
-		|(x, y, z): (isize, isize, isize)| (-x, y, -z),
-		|(x, y, z): (isize, isize, isize)| (-y, z, -x),
-		|(x, y, z): (isize, isize, isize)| (-z, x, -y),
-		|(x, y, z): (isize, isize, isize)| (-z, y, x),
-		|(x, y, z): (isize, isize, isize)| (-y, x, z),
-		|(x, y, z): (isize, isize, isize)| (-x, z, y),
-		|(x, y, z): (isize, isize, isize)| (-x, -y, z),
-		|(x, y, z): (isize, isize, isize)| (-y, -z, x),
-		|(x, y, z): (isize, isize, isize)| (-z, -x, y),
-		|(x, y, z): (isize, isize, isize)| (-z, -y, -x),
-		|(x, y, z): (isize, isize, isize)| (-y, -x, -z),
-		|(x, y, z): (isize, isize, isize)| (-x, -z, -y),
-	] {
-		let points = scanner.iter().map(|&(x, y, z)| f((x, y, z))).collect_vec();
+	map: &mut HashSet<Point>,
+	known_fingerprints: &HashMap<Fingerprint, Vec<(Point, Point)>>,
+	scanner: &[Point],
+	scanner_fingerprints: &[(Fingerprint, (Point, Point))],
+) -> Option<Vector3<isize>> {
+	let fns = [
+		|Vector3 { x, y, z }: Point| Vector3::new(x, y, z),
+		|Vector3 { x, y, z }: Point| Vector3::new(y, z, x),
+		|Vector3 { x, y, z }: Point| Vector3::new(z, x, y),
+		|Vector3 { x, y, z }: Point| Vector3::new(z, y, -x),
+		|Vector3 { x, y, z }: Point| Vector3::new(y, x, -z),
+		|Vector3 { x, y, z }: Point| Vector3::new(x, z, -y),
+		|Vector3 { x, y, z }: Point| Vector3::new(x, -y, -z),
+		|Vector3 { x, y, z }: Point| Vector3::new(y, -z, -x),
+		|Vector3 { x, y, z }: Point| Vector3::new(z, -x, -y),
+		|Vector3 { x, y, z }: Point| Vector3::new(z, -y, x),
+		|Vector3 { x, y, z }: Point| Vector3::new(y, -x, z),
+		|Vector3 { x, y, z }: Point| Vector3::new(x, -z, y),
+		|Vector3 { x, y, z }: Point| Vector3::new(-x, y, -z),
+		|Vector3 { x, y, z }: Point| Vector3::new(-y, z, -x),
+		|Vector3 { x, y, z }: Point| Vector3::new(-z, x, -y),
+		|Vector3 { x, y, z }: Point| Vector3::new(-z, y, x),
+		|Vector3 { x, y, z }: Point| Vector3::new(-y, x, z),
+		|Vector3 { x, y, z }: Point| Vector3::new(-x, z, y),
+		|Vector3 { x, y, z }: Point| Vector3::new(-x, -y, z),
+		|Vector3 { x, y, z }: Point| Vector3::new(-y, -z, x),
+		|Vector3 { x, y, z }: Point| Vector3::new(-z, -x, y),
+		|Vector3 { x, y, z }: Point| Vector3::new(-z, -y, -x),
+		|Vector3 { x, y, z }: Point| Vector3::new(-y, -x, -z),
+		|Vector3 { x, y, z }: Point| Vector3::new(-x, -z, -y),
+	];
 
-		for (dx, dy, dz) in map
+	let matching_fingerprints = scanner_fingerprints
+		.iter()
+		.filter(|(fingerprint, _)| known_fingerprints.contains_key(fingerprint))
+		.collect_vec();
+
+	if matching_fingerprints.len() < 66 {
+		return None;
+	}
+
+	// This should be able to find them all, but it isn't not sure why.
+	for (fingerprint, (bp1, bp2)) in matching_fingerprints {
+		for (kp1, kp2) in known_fingerprints.get(fingerprint).unwrap() {
+			for f in fns.iter().filter(|f| {
+				let (tp1, tp2) = (f(*bp1), f(*bp2));
+
+				kp1 - &tp1 == kp2 - &tp2
+			}) {
+				let delta = kp1 - &f(*bp1);
+
+				let reoriented_scanner_points = scanner.iter().map(|&point| f(point) + delta);
+
+				if reoriented_scanner_points
+					.clone()
+					.filter(|v| map.contains(v))
+					.count() >= 12
+				{
+					map.extend(scanner.iter().map(|&point| f(point) + delta));
+
+					return Some(delta);
+				}
+			}
+		}
+	}
+
+	// Leave the brute force rotation method for now as well after
+	// attempting the speedy version first.
+	for f in fns {
+		let points = scanner.iter().map(|&point| f(point)).collect_vec();
+
+		for delta in map
 			.iter()
 			.cartesian_product(&points)
-			.map(|((x1, y1, z1), (x2, y2, z2))| (x1 - x2, y1 - y2, z1 - z2))
+			.map(|(p1, p2)| p1 - p2)
 		{
-			let reoriented_scanner_points =
-				points.iter().map(|&(x, y, z)| (x + dx, y + dy, z + dz));
+			let reoriented_scanner_points = points.iter().map(|&point| point + delta);
 
 			if reoriented_scanner_points
 				.clone()
 				.filter(|v| map.contains(v))
 				.count() >= 12
 			{
-				map.extend(reoriented_scanner_points);
+				map.extend(
+					scanner
+						.iter()
+						.map(|&point| f(point))
+						.map(|point| point + delta),
+				);
 
-				return Some((dx, dy, dz));
+				return Some(delta);
 			}
 		}
 	}
