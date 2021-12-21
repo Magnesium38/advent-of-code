@@ -131,7 +131,7 @@ fn solve(input: &str) -> anyhow::Result<(usize, isize)> {
 			for (fingerprint, (p1, p2)) in reoriented_beacons
 				.iter()
 				.tuple_combinations::<(_, _)>()
-				.map(|(p1, p2)| (fingerprint(&p1, &p2), (p1, p2)))
+				.map(|(p1, p2)| (fingerprint(p1, p2), (p1, p2)))
 			{
 				fingerprints
 					.entry(fingerprint)
