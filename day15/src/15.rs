@@ -1,6 +1,5 @@
-use std::cmp::Reverse;
-
 use hashbrown::HashSet;
+use std::cmp::Reverse;
 
 pub fn pt1(input: &str) -> anyhow::Result<u32> {
 	let grid = advent::Grid::new(input);
@@ -19,11 +18,11 @@ pub fn pt1(input: &str) -> anyhow::Result<u32> {
 				if (x, y) == end {
 					return Ok(cost + tile_cost);
 				}
-				
+
 				if !visited.insert((x, y)) {
 					continue;
 				}
-				
+
 				priority_queue.push((Reverse(cost + tile_cost), x, y));
 			}
 		}
@@ -40,7 +39,6 @@ pub fn pt2(input: &str) -> anyhow::Result<u32> {
 
 	let mut large_grid = advent::Grid::new_with_size(grid.width * 5, grid.height * 5);
 
-
 	(0..(5 * grid.width)).for_each(|x| {
 		(0..(5 * grid.height)).for_each(|y| {
 			let cost = grid
@@ -51,7 +49,6 @@ pub fn pt2(input: &str) -> anyhow::Result<u32> {
 			large_grid.insert(x as isize, y as isize, (cost - 1) % 9 + 1);
 		})
 	});
-
 
 	let grid = large_grid;
 
@@ -69,11 +66,11 @@ pub fn pt2(input: &str) -> anyhow::Result<u32> {
 				if (x, y) == end {
 					return Ok(cost + tile_cost);
 				}
-				
+
 				if !visited.insert((x, y)) {
 					continue;
 				}
-				
+
 				priority_queue.push((Reverse(cost + tile_cost), x, y));
 			}
 		}
