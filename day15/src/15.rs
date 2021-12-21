@@ -7,25 +7,24 @@ pub fn pt1(input: &str) -> anyhow::Result<u32> {
 
 	let mut priority_queue = std::collections::BinaryHeap::new();
 	let mut visited = HashSet::new();
+	let end = ((grid.width - 1) as isize, (grid.height - 1) as isize);
 
-	priority_queue.push((Reverse(0), (0, 0)));
+	priority_queue.push((Reverse(0), 0, 0));
 
-	while let Some((Reverse(cost), (x, y))) = priority_queue.pop() {
-		if !visited.insert((x, y)) {
-			continue;
-		}
-
+	while let Some((Reverse(cost), x, y)) = priority_queue.pop() {
 		for (dx, dy) in &[(0, 1), (1, 0), (0, -1), (-1, 0)] {
-			let (nx, ny) = (x + dx, y + dy);
+			let (x, y) = (x + dx, y + dy);
 
-			if let Some(tile_cost) = grid.get(nx, ny) {
-				if nx == (grid.width - 1).try_into().unwrap()
-					&& ny == (grid.height - 1).try_into().unwrap()
-				{
+			if let Some(tile_cost) = grid.get(x, y) {
+				if (x, y) == end {
 					return Ok(cost + tile_cost);
 				}
-
-				priority_queue.push((Reverse(cost + tile_cost), (nx, ny)));
+				
+				if !visited.insert((x, y)) {
+					continue;
+				}
+				
+				priority_queue.push((Reverse(cost + tile_cost), x, y));
 			}
 		}
 	}
@@ -63,16 +62,16 @@ pub fn pt2(input: &str) -> anyhow::Result<u32> {
 	let end = ((grid.width - 1) as isize, (grid.height - 1) as isize);
 
 	while let Some((Reverse(cost), x, y)) = priority_queue.pop() {
-		if !visited.insert((x, y)) {
-			continue;
-		}
-
 		for (dx, dy) in &[(0, 1), (1, 0), (0, -1), (-1, 0)] {
 			let (x, y) = (x + dx, y + dy);
 
 			if let Some(tile_cost) = grid.get(x, y) {
 				if (x, y) == end {
 					return Ok(cost + tile_cost);
+				}
+				
+				if !visited.insert((x, y)) {
+					continue;
 				}
 				
 				priority_queue.push((Reverse(cost + tile_cost), x, y));
