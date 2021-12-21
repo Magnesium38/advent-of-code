@@ -47,7 +47,9 @@ fn solve(input: &str) -> anyhow::Result<(usize, isize)> {
 		map.insert((x, y, z));
 	});
 
-	let mut scanner_positions = vec![(0, 0, 0); scanners.len()];
+	let mut scanner_positions = Vec::with_capacity(scanners.len());
+
+	sort_scanners(&mut scanners, &distances);
 
 	while !scanners.is_empty() {
 		let (scanner, beacon_distances) = scanners.remove(0);
@@ -84,6 +86,24 @@ fn solve(input: &str) -> anyhow::Result<(usize, isize)> {
 		.max()
 		.map(|max| (map.len(), max))
 		.ok_or(anyhow::anyhow!("no solution found"))
+}
+
+fn sort_scanners(
+	scanners: &mut Vec<(Vec<(isize, isize, isize)>, Vec<isize>)>,
+	distances: &[isize],
+) {
+	scanners.sort_by(|(_, d1), (_, d2)| {
+		d2.iter()
+			.cartesian_product(distances)
+			.filter(|(d1, d2)| d1 == d2)
+			.count()
+			.cmp(
+				&d1.iter()
+					.cartesian_product(distances)
+					.filter(|(d1, d2)| d1 == d2)
+					.count(),
+			)
+	});
 }
 
 fn merge_scanner(
