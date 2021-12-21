@@ -43,92 +43,36 @@ fn solve(input: &str) -> anyhow::Result<(usize, isize)> {
 		.map(|((x1, y1, z1), (x2, y2, z2))| (x2 - x1).pow(2) + (y2 - y1).pow(2) + (z2 - z1).pow(2))
 		.collect_vec();
 
-	'outer: while !scanners.is_empty() {
+	while !scanners.is_empty() {
 		let scanner = scanners.remove(0);
 
-		let beacon_distances = scanner
+		if scanner
 			.iter()
-			.map(|&(x, y, z)| (x, y, z))
 			.tuple_combinations::<(_, _)>()
 			.map(|((x1, y1, z1), (x2, y2, z2))| {
 				(x2 - x1).pow(2) + (y2 - y1).pow(2) + (z2 - z1).pow(2)
 			})
-			.collect_vec();
-
-		let matching_distances = beacon_distances
-			.iter()
 			.cartesian_product(&distances)
-			.filter(|&(d1, d2)| d1 == d2)
-			.count();
-
-		if matching_distances < 66 {
+			.filter(|(d1, d2)| d1 == *d2)
+			.count() < 66
+		{
 			scanners.push(scanner);
 			continue;
 		}
 
-		for f in [
-			|(x, y, z): (isize, isize, isize)| (x, y, z),
-			|(x, y, z): (isize, isize, isize)| (y, z, x),
-			|(x, y, z): (isize, isize, isize)| (z, x, y),
-			|(x, y, z): (isize, isize, isize)| (z, y, -x),
-			|(x, y, z): (isize, isize, isize)| (y, x, -z),
-			|(x, y, z): (isize, isize, isize)| (x, z, -y),
-			|(x, y, z): (isize, isize, isize)| (x, -y, -z),
-			|(x, y, z): (isize, isize, isize)| (y, -z, -x),
-			|(x, y, z): (isize, isize, isize)| (z, -x, -y),
-			|(x, y, z): (isize, isize, isize)| (z, -y, x),
-			|(x, y, z): (isize, isize, isize)| (y, -x, z),
-			|(x, y, z): (isize, isize, isize)| (x, -z, y),
-			|(x, y, z): (isize, isize, isize)| (-x, y, -z),
-			|(x, y, z): (isize, isize, isize)| (-y, z, -x),
-			|(x, y, z): (isize, isize, isize)| (-z, x, -y),
-			|(x, y, z): (isize, isize, isize)| (-z, y, x),
-			|(x, y, z): (isize, isize, isize)| (-y, x, z),
-			|(x, y, z): (isize, isize, isize)| (-x, z, y),
-			|(x, y, z): (isize, isize, isize)| (-x, -y, z),
-			|(x, y, z): (isize, isize, isize)| (-y, -z, x),
-			|(x, y, z): (isize, isize, isize)| (-z, -x, y),
-			|(x, y, z): (isize, isize, isize)| (-z, -y, -x),
-			|(x, y, z): (isize, isize, isize)| (-y, -x, -z),
-			|(x, y, z): (isize, isize, isize)| (-x, -z, -y),
-		] {
-			let points = scanner.iter().map(|&(x, y, z)| f((x, y, z))).collect_vec();
+		if let Some(position) = merge_scanner(&mut map, &scanner) {
+			scanner_positions.push(position);
 
-			for scanner_point in &points {
-				for map_point in &map {
-					let delta = (
-						map_point.0 - scanner_point.0,
-						map_point.1 - scanner_point.1,
-						map_point.2 - scanner_point.2,
-					);
-
-					let reoriented_scanner_points = points
-						.iter()
-						.map(|&(x, y, z)| (x + delta.0, y + delta.1, z + delta.2));
-
-					if reoriented_scanner_points
-						.clone()
-						.filter(|v| map.contains(v))
-						.count() >= 12
-					{
-						map.extend(reoriented_scanner_points);
-						scanner_positions.push(delta);
-
-						distances = map
-							.iter()
-							.tuple_combinations::<(_, _)>()
-							.map(|((x1, y1, z1), (x2, y2, z2))| {
-								(x2 - x1).pow(2) + (y2 - y1).pow(2) + (z2 - z1).pow(2)
-							})
-							.collect_vec();
-
-						continue 'outer;
-					}
-				}
-			}
+			distances = map
+				.iter()
+				.tuple_combinations::<(_, _)>()
+				.map(|((x1, y1, z1), (x2, y2, z2))| {
+					(x2 - x1).pow(2) + (y2 - y1).pow(2) + (z2 - z1).pow(2)
+				})
+				.collect_vec();
+		} else {
+			scanners.push(scanner);
 		}
-
-		scanners.push(scanner);
 	}
 
 	scanner_positions
@@ -138,6 +82,61 @@ fn solve(input: &str) -> anyhow::Result<(usize, isize)> {
 		.max()
 		.map(|max| (map.len(), max))
 		.ok_or(anyhow::anyhow!("no solution found"))
+}
+
+fn merge_scanner(
+	map: &mut HashSet<(isize, isize, isize)>,
+	scanner: &[(isize, isize, isize)],
+) -> Option<(isize, isize, isize)> {
+	for f in [
+		|(x, y, z): (isize, isize, isize)| (x, y, z),
+		|(x, y, z): (isize, isize, isize)| (y, z, x),
+		|(x, y, z): (isize, isize, isize)| (z, x, y),
+		|(x, y, z): (isize, isize, isize)| (z, y, -x),
+		|(x, y, z): (isize, isize, isize)| (y, x, -z),
+		|(x, y, z): (isize, isize, isize)| (x, z, -y),
+		|(x, y, z): (isize, isize, isize)| (x, -y, -z),
+		|(x, y, z): (isize, isize, isize)| (y, -z, -x),
+		|(x, y, z): (isize, isize, isize)| (z, -x, -y),
+		|(x, y, z): (isize, isize, isize)| (z, -y, x),
+		|(x, y, z): (isize, isize, isize)| (y, -x, z),
+		|(x, y, z): (isize, isize, isize)| (x, -z, y),
+		|(x, y, z): (isize, isize, isize)| (-x, y, -z),
+		|(x, y, z): (isize, isize, isize)| (-y, z, -x),
+		|(x, y, z): (isize, isize, isize)| (-z, x, -y),
+		|(x, y, z): (isize, isize, isize)| (-z, y, x),
+		|(x, y, z): (isize, isize, isize)| (-y, x, z),
+		|(x, y, z): (isize, isize, isize)| (-x, z, y),
+		|(x, y, z): (isize, isize, isize)| (-x, -y, z),
+		|(x, y, z): (isize, isize, isize)| (-y, -z, x),
+		|(x, y, z): (isize, isize, isize)| (-z, -x, y),
+		|(x, y, z): (isize, isize, isize)| (-z, -y, -x),
+		|(x, y, z): (isize, isize, isize)| (-y, -x, -z),
+		|(x, y, z): (isize, isize, isize)| (-x, -z, -y),
+	] {
+		let points = scanner.iter().map(|&(x, y, z)| f((x, y, z))).collect_vec();
+
+		for (dx, dy, dz) in map
+			.iter()
+			.cartesian_product(&points)
+			.map(|((x1, y1, z1), (x2, y2, z2))| (x1 - x2, y1 - y2, z1 - z2))
+		{
+			let reoriented_scanner_points =
+				points.iter().map(|&(x, y, z)| (x + dx, y + dy, z + dz));
+
+			if reoriented_scanner_points
+				.clone()
+				.filter(|v| map.contains(v))
+				.count() >= 12
+			{
+				map.extend(reoriented_scanner_points);
+
+				return Some((dx, dy, dz));
+			}
+		}
+	}
+
+	None
 }
 
 advent::problem!(
