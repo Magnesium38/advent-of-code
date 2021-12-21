@@ -29,34 +29,36 @@ fn solve(input: &str) -> anyhow::Result<(usize, isize)> {
 				})
 				.collect_vec()
 		})
+		.map(|scanner| {
+			let distances = scanner
+				.iter()
+				.tuple_combinations::<(_, _)>()
+				.map(|((x1, y1, z1), (x2, y2, z2))| {
+					(x2 - x1).pow(2) + (y2 - y1).pow(2) + (z2 - z1).pow(2)
+				})
+				.collect_vec();
+
+			(scanner, distances)
+		})
 		.collect_vec();
 
-	let scanner = scanners.remove(0);
+	let (scanner, mut distances) = scanners.remove(0);
 	scanner.iter().for_each(|&(x, y, z)| {
 		map.insert((x, y, z));
 	});
 
 	let mut scanner_positions = vec![(0, 0, 0); scanners.len()];
-	let mut distances = map
-		.iter()
-		.tuple_combinations::<(_, _)>()
-		.map(|((x1, y1, z1), (x2, y2, z2))| (x2 - x1).pow(2) + (y2 - y1).pow(2) + (z2 - z1).pow(2))
-		.collect_vec();
 
 	while !scanners.is_empty() {
-		let scanner = scanners.remove(0);
+		let (scanner, beacon_distances) = scanners.remove(0);
 
-		if scanner
+		if beacon_distances
 			.iter()
-			.tuple_combinations::<(_, _)>()
-			.map(|((x1, y1, z1), (x2, y2, z2))| {
-				(x2 - x1).pow(2) + (y2 - y1).pow(2) + (z2 - z1).pow(2)
-			})
 			.cartesian_product(&distances)
-			.filter(|(d1, d2)| d1 == *d2)
+			.filter(|(d1, d2)| d1 == d2)
 			.count() < 66
 		{
-			scanners.push(scanner);
+			scanners.push((scanner, beacon_distances));
 			continue;
 		}
 
@@ -71,7 +73,7 @@ fn solve(input: &str) -> anyhow::Result<(usize, isize)> {
 				})
 				.collect_vec();
 		} else {
-			scanners.push(scanner);
+			scanners.push((scanner, beacon_distances));
 		}
 	}
 
