@@ -123,13 +123,23 @@ fn solve(input: &str) -> anyhow::Result<(usize, isize)> {
 	while !scanners.is_empty() {
 		let (scanner, scanner_fingerprints) = scanners.remove(0);
 
-		if let Some(delta) = merge_scanner(&mut map, &fingerprints, &scanner, &scanner_fingerprints)
+		if let Some((delta, reoriented_beacons)) =
+			merge_scanner(&mut map, &fingerprints, &scanner, &scanner_fingerprints)
 		{
 			scanner_positions.push(delta);
 
-			for (fingerprint, (p1, p2)) in scanner_fingerprints {
-				fingerprints.entry(fingerprint).or_default().push((p1, p2));
+			for (fingerprint, (p1, p2)) in reoriented_beacons
+				.iter()
+				.tuple_combinations::<(_, _)>()
+				.map(|(p1, p2)| (fingerprint(&p1, &p2), (p1, p2)))
+			{
+				fingerprints
+					.entry(fingerprint)
+					.or_default()
+					.push((*p1, *p2));
 			}
+
+			map.extend(reoriented_beacons);
 		} else {
 			scanners.push((scanner, scanner_fingerprints));
 		}
@@ -171,7 +181,7 @@ fn merge_scanner(
 	known_fingerprints: &HashMap<Fingerprint, Vec<(Point, Point)>>,
 	scanner: &[Point],
 	scanner_fingerprints: &[(Fingerprint, (Point, Point))],
-) -> Option<Vector3<isize>> {
+) -> Option<(Vector3<isize>, Vec<Vector3<isize>>)> {
 	let fns = [
 		|Vector3 { x, y, z }: Point| Vector3::new(x, y, z),
 		|Vector3 { x, y, z }: Point| Vector3::new(y, z, x),
@@ -208,7 +218,6 @@ fn merge_scanner(
 		return None;
 	}
 
-	// This should be able to find them all, but it isn't not sure why.
 	for (fingerprint, (bp1, bp2)) in matching_fingerprints {
 		for (kp1, kp2) in known_fingerprints.get(fingerprint).unwrap() {
 			for f in fns.iter().filter(|f| {
@@ -218,46 +227,16 @@ fn merge_scanner(
 			}) {
 				let delta = kp1 - &f(*bp1);
 
-				let reoriented_scanner_points = scanner.iter().map(|&point| f(point) + delta);
+				let reoriented_scanner_points =
+					scanner.iter().map(|&point| f(point) + delta).collect_vec();
 
 				if reoriented_scanner_points
-					.clone()
+					.iter()
 					.filter(|v| map.contains(v))
 					.count() >= 12
 				{
-					map.extend(scanner.iter().map(|&point| f(point) + delta));
-
-					return Some(delta);
+					return Some((delta, reoriented_scanner_points));
 				}
-			}
-		}
-	}
-
-	// Leave the brute force rotation method for now as well after
-	// attempting the speedy version first.
-	for f in fns {
-		let points = scanner.iter().map(|&point| f(point)).collect_vec();
-
-		for delta in map
-			.iter()
-			.cartesian_product(&points)
-			.map(|(p1, p2)| p1 - p2)
-		{
-			let reoriented_scanner_points = points.iter().map(|&point| point + delta);
-
-			if reoriented_scanner_points
-				.clone()
-				.filter(|v| map.contains(v))
-				.count() >= 12
-			{
-				map.extend(
-					scanner
-						.iter()
-						.map(|&point| f(point))
-						.map(|point| point + delta),
-				);
-
-				return Some(delta);
 			}
 		}
 	}
