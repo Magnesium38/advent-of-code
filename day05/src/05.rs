@@ -1,22 +1,21 @@
 use hashbrown::HashMap;
 use itertools::Itertools;
 
-pub fn pt1(input: &str) -> anyhow::Result<isize> {
-	Ok(
-		from_lines(parse_input(input).filter(|(x1, y1, x2, y2)| x1 == x2 || y1 == y2))
-			.iter()
-			.fold(
-				0,
-				|total, (_, &value)| if value > 1 { total + 1 } else { total },
-			),
-	)
+pub fn pt1(input: &str) -> anyhow::Result<usize> {
+	let mut map = HashMap::new();
+
+	Ok(parse_input(input)
+		.filter(|(x1, y1, x2, y2)| x1 == x2 || y1 == y2)
+		.map(|line| count_entries(line, &mut map))
+		.sum())
 }
 
-pub fn pt2(input: &str) -> anyhow::Result<isize> {
-	Ok(from_lines(parse_input(input)).iter().fold(
-		0,
-		|total, (_, &value)| if value > 1 { total + 1 } else { total },
-	))
+pub fn pt2(input: &str) -> anyhow::Result<usize> {
+	let mut map = HashMap::new();
+
+	Ok(parse_input(input)
+		.map(|line| count_entries(line, &mut map))
+		.sum())
 }
 
 fn parse_input(input: &str) -> impl Iterator<Item = (isize, isize, isize, isize)> + '_ {
@@ -29,25 +28,27 @@ fn parse_input(input: &str) -> impl Iterator<Item = (isize, isize, isize, isize)
 	})
 }
 
-fn from_lines<T: Iterator<Item = (isize, isize, isize, isize)>>(
-	lines: T,
-) -> HashMap<(isize, isize), isize> {
-	let mut data = HashMap::new();
+fn count_entries(
+	(x1, y1, x2, y2): (isize, isize, isize, isize),
+	map: &mut HashMap<(isize, isize), isize>,
+) -> usize {
+	let mut count = 0;
+	let dx = (x2 - x1).signum();
+	let dy = (y2 - y1).signum();
 
-	for (x1, y1, x2, y2) in lines {
-		let dx = (x2 - x1).signum();
-		let dy = (y2 - y1).signum();
-
-		let (mut x, mut y) = (x1, y1);
-		while (x, y) != (x2 + dx, y2 + dy) {
-			data.entry((x, y)).and_modify(|v| *v += 1).or_insert(1);
-
-			x += dx;
-			y += dy;
+	let (mut x, mut y) = (x1, y1);
+	while (x, y) != (x2 + dx, y2 + dy) {
+		let entry = map.entry((x, y)).or_insert(0);
+		*entry += 1;
+		if *entry == 2 {
+			count += 1;
 		}
+
+		x += dx;
+		y += dy;
 	}
 
-	data
+	count
 }
 
 advent::problem!(
