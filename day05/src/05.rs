@@ -1,85 +1,49 @@
 use itertools::Itertools;
-use std::{collections::HashMap, str::FromStr};
+use std::collections::HashMap;
 
 pub fn pt1(input: &str) -> anyhow::Result<isize> {
-	Ok(from_lines(
-		input
-			.lines()
-			.map(|line| line.parse().unwrap())
-			.filter(|line: &Line| line.is_horizontal() || line.is_vertical()),
+	Ok(
+		from_lines(parse_input(input).filter(|(x1, y1, x2, y2)| x1 == x2 || y1 == y2))
+			.iter()
+			.fold(
+				0,
+				|total, (_, &value)| if value > 1 { total + 1 } else { total },
+			),
 	)
-	.iter()
-	.fold(
+}
+
+pub fn pt2(input: &str) -> anyhow::Result<isize> {
+	Ok(from_lines(parse_input(input)).iter().fold(
 		0,
 		|total, (_, &value)| if value > 1 { total + 1 } else { total },
 	))
 }
 
-pub fn pt2(input: &str) -> anyhow::Result<isize> {
-	Ok(from_lines(input.lines().map(|line| line.parse().unwrap()))
-		.iter()
-		.fold(
-			0,
-			|total, (_, &value)| if value > 1 { total + 1 } else { total },
-		))
+fn parse_input(input: &str) -> impl Iterator<Item = (isize, isize, isize, isize)> + '_ {
+	input.lines().map(|line| {
+		line.split(" -> ")
+			.flat_map(|s| s.split(','))
+			.map(|n| n.parse::<isize>().unwrap())
+			.collect_tuple()
+			.unwrap()
+	})
 }
 
-struct Line((isize, isize), (isize, isize));
-
-impl Line {
-	const fn is_horizontal(&self) -> bool {
-		self.0 .0 == self.1 .0
-	}
-
-	const fn is_vertical(&self) -> bool {
-		self.0 .1 == self.1 .1
-	}
-}
-
-impl FromStr for Line {
-	type Err = anyhow::Error;
-
-	fn from_str(s: &str) -> anyhow::Result<Self> {
-		fn to_point(s: Option<&str>) -> anyhow::Result<(isize, isize)> {
-			s.ok_or(anyhow::anyhow!("invalid input"))?
-				.split(',')
-				.map(|s| s.parse().unwrap())
-				.collect_tuple()
-				.ok_or(anyhow::anyhow!("invalid point"))
-		}
-		
-		let mut iter = s.split(" -> ");
-
-		Ok(Self(to_point(iter.next())?, to_point(iter.next())?))
-	}
-}
-
-impl IntoIterator for Line {
-	type Item = (isize, isize);
-	type IntoIter = std::vec::IntoIter<(isize, isize)>;
-
-	fn into_iter(self) -> Self::IntoIter {
-		let mut iter = Vec::new();
-
-		let (x1, y1) = self.0;
-		let (x2, y2) = self.1;
-		let (dx, dy) = (x2 - x1, y2 - y1);
-
-		for i in 0..=dx.abs().max(dy.abs()) {
-			iter.push((x1 + i * dx.signum(), y1 + i * dy.signum()));
-		}
-
-		iter.into_iter()
-	}
-}
-
-fn from_lines<T: Iterator<Item = Line>>(lines: T) -> HashMap<(isize, isize), isize> {
+fn from_lines<T: Iterator<Item = (isize, isize, isize, isize)>>(
+	lines: T,
+) -> HashMap<(isize, isize), isize> {
 	let mut data = HashMap::new();
 
-	for line in lines {
-		for point in line {
-			let value = data.entry(point).or_insert(0);
-			*value += 1;
+	for (x1, y1, x2, y2) in lines {
+		let dx = (x2 - x1).signum();
+		let dy = (y2 - y1).signum();
+
+		let (mut x, mut y) = (x1, y1);
+		while (x, y) != (x2 + dx, y2 + dy) {
+			data.entry((x, y)).and_modify(|v| *v += 1).or_insert(1);
+
+			x += dx;
+			y += dy;
 		}
 	}
 
