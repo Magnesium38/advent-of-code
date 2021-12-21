@@ -1,5 +1,5 @@
+use hashbrown::HashMap;
 use itertools::Itertools;
-use std::collections::HashMap;
 
 pub fn pt1(input: &str) -> anyhow::Result<isize> {
 	Ok(
