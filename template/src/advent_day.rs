@@ -1,7 +1,5 @@
-pub fn pt1(input: &str) -> anyhow::Result<isize> {
-	dbg!(&input);
-
-	Ok(1)
+pub fn pt1(_input: &str) -> anyhow::Result<isize> {
+	Ok(0)
 }
 
 pub fn pt2(_input: &str) -> anyhow::Result<isize> {
