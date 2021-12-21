@@ -1,7 +1,6 @@
 use std::cmp::Reverse;
 
-use hashbrown::{HashMap, HashSet};
-use itertools::Itertools;
+use hashbrown::HashSet;
 
 pub fn pt1(input: &str) -> anyhow::Result<u32> {
 	let grid = advent::Grid::new(input);
@@ -35,60 +34,48 @@ pub fn pt1(input: &str) -> anyhow::Result<u32> {
 }
 
 pub fn pt2(input: &str) -> anyhow::Result<u32> {
-	let input: HashMap<(isize, isize), u32> = input
+	let grid: advent::Grid<u32> = input
 		.lines()
-		.enumerate()
-		.flat_map(|(x, line)| {
-			line.chars().enumerate().map(move |(y, tile)| {
-				(
-					(x.try_into().unwrap(), y.try_into().unwrap()),
-					tile.to_digit(10).unwrap(),
-				)
-			})
+		.map(|line| line.chars().map(|tile| tile.to_digit(10).unwrap()))
+		.into();
+
+	let mut large_grid = advent::Grid::new_with_size(grid.width * 5, grid.height * 5);
+
+
+	(0..(5 * grid.width)).for_each(|x| {
+		(0..(5 * grid.height)).for_each(|y| {
+			let cost = grid
+				.get((x % grid.width) as isize, (y % grid.height) as isize)
+				.unwrap() + (x / grid.width) as u32
+				+ (y / grid.height) as u32;
+
+			large_grid.insert(x as isize, y as isize, (cost - 1) % 9 + 1);
 		})
-		.collect();
+	});
 
-	let width = input.keys().map(|(x, _)| *x).max().unwrap() + 1;
-	let height = input.keys().map(|(_, y)| *y).max().unwrap() + 1;
 
-	let grid: HashMap<(isize, isize), u32> = (0..5)
-		.cartesian_product(0..5)
-		.flat_map(|(x, y): (isize, isize)| {
-			input.iter().map(move |((i, j), &cost)| {
-				let x_cost: u32 = x.try_into().unwrap();
-				let y_cost: u32 = y.try_into().unwrap();
-
-				(
-					(x * width + i, y * height + j),
-					(cost + x_cost + y_cost - 1) % 9 + 1,
-				)
-			})
-		})
-		.collect();
+	let grid = large_grid;
 
 	let mut priority_queue = std::collections::BinaryHeap::new();
 	let mut visited = HashSet::new();
 
-	priority_queue.push((Reverse(0), (0, 0)));
-	let end = (
-		grid.keys().map(|(x, _)| *x).max().unwrap(),
-		grid.keys().map(|(_, y)| *y).max().unwrap(),
-	);
+	priority_queue.push((Reverse(0), 0, 0));
+	let end = ((grid.width - 1) as isize, (grid.height - 1) as isize);
 
-	while let Some((Reverse(cost), (x, y))) = priority_queue.pop() {
+	while let Some((Reverse(cost), x, y)) = priority_queue.pop() {
 		if !visited.insert((x, y)) {
 			continue;
 		}
 
 		for (dx, dy) in &[(0, 1), (1, 0), (0, -1), (-1, 0)] {
-			let next = (x + dx, y + dy);
+			let (x, y) = (x + dx, y + dy);
 
-			if let Some(tile_cost) = grid.get(&next) {
-				if next == end {
+			if let Some(tile_cost) = grid.get(x, y) {
+				if (x, y) == end {
 					return Ok(cost + tile_cost);
 				}
-
-				priority_queue.push((Reverse(cost + tile_cost), next));
+				
+				priority_queue.push((Reverse(cost + tile_cost), x, y));
 			}
 		}
 	}
