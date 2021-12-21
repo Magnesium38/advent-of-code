@@ -4,7 +4,7 @@ extern crate prettytable;
 use prettytable::{Cell, Row, Table};
 use std::time::Duration;
 
-const RUNS: u32 = 10;
+const RUNS: u32 = 50;
 
 fn main() -> anyhow::Result<()> {
 	let jobs = [
