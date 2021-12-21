@@ -42,8 +42,6 @@ fn main() -> anyhow::Result<()> {
 				std::fs::read_to_string(format!("input/{}.txt", day)).unwrap_or("".to_string());
 			let input = input.trim();
 
-			println!("benchmarking day {}", day);
-
 			Ok((
 				day,
 				benchmark_function(&pt1, input)?,
@@ -101,7 +99,7 @@ fn main() -> anyhow::Result<()> {
 					{
 						let mut cell = Cell::new(&format!(
 							"{:.4}%",
-							pt2_avg as f64 / pt1_total as f64 * 100.0,
+							pt2_avg as f64 / pt2_total as f64 * 100.0,
 						));
 
 						cell.align(prettytable::format::Alignment::RIGHT);
