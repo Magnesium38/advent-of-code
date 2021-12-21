@@ -5,8 +5,8 @@ pub fn pt1(input: &str) -> anyhow::Result<usize> {
 
 	let toggle = *algorithm.first().unwrap();
 	for _ in 0..1 {
-		image = enhance(image, &algorithm, toggle && false);
-		image = enhance(image, &algorithm, toggle && true);
+		image = enhance(image, &algorithm, false);
+		image = enhance(image, &algorithm, toggle);
 	}
 
 	Ok(image.iter().filter(|(_, &v)| v).count())
@@ -17,8 +17,8 @@ pub fn pt2(input: &str) -> anyhow::Result<usize> {
 
 	let toggle = *algorithm.first().unwrap();
 	for _ in 0..25 {
-		image = enhance(image, &algorithm, toggle && false);
-		image = enhance(image, &algorithm, toggle && true);
+		image = enhance(image, &algorithm, false);
+		image = enhance(image, &algorithm, toggle);
 	}
 
 	Ok(image.iter().filter(|(_, &v)| v).count())
@@ -51,7 +51,7 @@ fn parse_input(input: &str) -> (Vec<bool>, advent::Grid<bool>) {
 
 fn enhance(
 	mut map: advent::Grid<bool>,
-	algorithm: &Vec<bool>,
+	algorithm: &[bool],
 	default: bool,
 ) -> advent::Grid<bool> {
 	map.add_row(0, default);

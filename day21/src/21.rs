@@ -26,12 +26,16 @@ pub fn pt2(input: &str) -> anyhow::Result<usize> {
 	Ok(player_one_wins.max(player_two_wins))
 }
 
+type Positions = (usize, usize);
+type Scores = (usize, usize);
+type Wins = (usize, usize);
+
 fn dirac_game(
-	cache: &mut HashMap<((usize, usize), (usize, usize), bool), (usize, usize)>,
-	(s1, s2): (usize, usize),
-	(p1, p2): (usize, usize),
+	cache: &mut HashMap<(Scores, Positions, bool), Wins>,
+	(s1, s2): Scores,
+	(p1, p2): Positions,
 	player_one_turn: bool,
-) -> (usize, usize) {
+) -> Wins {
 	if s1 >= 21 {
 		return (1, 0);
 	}

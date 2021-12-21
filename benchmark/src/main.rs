@@ -39,7 +39,7 @@ fn main() -> anyhow::Result<()> {
 		.iter()
 		.map(|(pt1, pt2, day)| {
 			let input =
-				std::fs::read_to_string(format!("input/{}.txt", day)).unwrap_or("".to_string());
+				std::fs::read_to_string(format!("input/{}.txt", day)).unwrap_or_else(|_| "".to_string());
 			let input = input.trim();
 
 			Ok((
