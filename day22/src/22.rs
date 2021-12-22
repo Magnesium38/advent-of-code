@@ -1,104 +1,43 @@
-use itertools::Itertools;
-
 pub fn pt1(input: &str) -> anyhow::Result<isize> {
 	let bound = Region::new(-50, 50, -50, 50, -50, 50, true);
 
-	let regions = input
-		.lines()
-		.map(|line| {
-			let (command, values) = line.split_once(' ').unwrap();
-			let command = command == "on";
-
-			let (x, rest) = values.split_once(',').unwrap();
-			let (y, z) = rest.split_once(',').unwrap();
-
-			let (_, x) = x.split_once('=').unwrap();
-			let (_, y) = y.split_once('=').unwrap();
-			let (_, z) = z.split_once('=').unwrap();
-
-			let (x1, x2) = x.split_once("..").unwrap();
-			let (y1, y2) = y.split_once("..").unwrap();
-			let (z1, z2) = z.split_once("..").unwrap();
-
-			let x1 = x1.parse::<isize>().unwrap();
-			let x2 = x2.parse::<isize>().unwrap() + 1;
-			let y1 = y1.parse::<isize>().unwrap();
-			let y2 = y2.parse::<isize>().unwrap() + 1;
-			let z1 = z1.parse::<isize>().unwrap();
-			let z2 = z2.parse::<isize>().unwrap() + 1;
-
-			Region::new(x1, x2, y1, y2, z1, z2, command)
-		})
-		.filter(|&region| bound.contains(region))
-		.collect_vec();
-
-	let mut new_regions: Vec<Region> = Vec::new();
-	for region in regions {
-		let mut to_add = Vec::new();
-		for existing_region in &new_regions {
-			if existing_region.intersects(region) {
-				let ix1 = existing_region.x1.max(region.x1);
-				let ix2 = existing_region.x2.min(region.x2);
-				let iy1 = existing_region.y1.max(region.y1);
-				let iy2 = existing_region.y2.min(region.y2);
-				let iz1 = existing_region.z1.max(region.z1);
-				let iz2 = existing_region.z2.min(region.z2);
-				if ix1 <= ix2 && iy1 <= iy2 && iz1 <= iz2 {
-					to_add.push(Region::new(
-						ix1,
-						ix2,
-						iy1,
-						iy2,
-						iz1,
-						iz2,
-						!existing_region.command,
-					));
-				}
-			}
-		}
-
-		if region.command {
-			to_add.push(region);
-		}
-
-		new_regions.extend(to_add);
-	}
-
-	Ok(new_regions
-		.iter()
-		.map(|region| region.volume() * if region.command { 1 } else { -1 })
-		.sum())
+	Ok(solve(
+		parse_input(input).filter(|&region| bound.contains(region)),
+	))
 }
 
 pub fn pt2(input: &str) -> anyhow::Result<isize> {
-	let regions = input
-		.lines()
-		.map(|line| {
-			let (command, values) = line.split_once(' ').unwrap();
-			let command = command == "on";
+	Ok(solve(parse_input(input)))
+}
 
-			let (x, rest) = values.split_once(',').unwrap();
-			let (y, z) = rest.split_once(',').unwrap();
+fn parse_input(input: &str) -> impl Iterator<Item = Region> + '_ {
+	input.lines().map(|line| {
+		let (command, values) = line.split_once(' ').unwrap();
+		let command = command == "on";
 
-			let (_, x) = x.split_once('=').unwrap();
-			let (_, y) = y.split_once('=').unwrap();
-			let (_, z) = z.split_once('=').unwrap();
+		let (x, rest) = values.split_once(',').unwrap();
+		let (y, z) = rest.split_once(',').unwrap();
 
-			let (x1, x2) = x.split_once("..").unwrap();
-			let (y1, y2) = y.split_once("..").unwrap();
-			let (z1, z2) = z.split_once("..").unwrap();
+		let (_, x) = x.split_once('=').unwrap();
+		let (_, y) = y.split_once('=').unwrap();
+		let (_, z) = z.split_once('=').unwrap();
 
-			let x1 = x1.parse::<isize>().unwrap();
-			let x2 = x2.parse::<isize>().unwrap() + 1;
-			let y1 = y1.parse::<isize>().unwrap();
-			let y2 = y2.parse::<isize>().unwrap() + 1;
-			let z1 = z1.parse::<isize>().unwrap();
-			let z2 = z2.parse::<isize>().unwrap() + 1;
+		let (x1, x2) = x.split_once("..").unwrap();
+		let (y1, y2) = y.split_once("..").unwrap();
+		let (z1, z2) = z.split_once("..").unwrap();
 
-			Region::new(x1, x2, y1, y2, z1, z2, command)
-		})
-		.collect_vec();
+		let x1 = x1.parse::<isize>().unwrap();
+		let x2 = x2.parse::<isize>().unwrap() + 1;
+		let y1 = y1.parse::<isize>().unwrap();
+		let y2 = y2.parse::<isize>().unwrap() + 1;
+		let z1 = z1.parse::<isize>().unwrap();
+		let z2 = z2.parse::<isize>().unwrap() + 1;
 
+		Region::new(x1, x2, y1, y2, z1, z2, command)
+	})
+}
+
+fn solve<T: Iterator<Item = Region>>(regions: T) -> isize {
 	let mut new_regions: Vec<Region> = Vec::new();
 	for region in regions {
 		let mut to_add = Vec::new();
@@ -131,10 +70,10 @@ pub fn pt2(input: &str) -> anyhow::Result<isize> {
 		new_regions.extend(to_add);
 	}
 
-	Ok(new_regions
+	new_regions
 		.iter()
 		.map(|region| region.volume() * if region.command { 1 } else { -1 })
-		.sum())
+		.sum()
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash)]
@@ -146,23 +85,6 @@ struct Region {
 	z1: isize,
 	z2: isize,
 	command: bool,
-}
-
-impl std::fmt::Debug for Region {
-	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-		write!(
-			f,
-			"Region {{({}, {}), ({}, {}), ({}, {}), command: {}, volume: {} }}",
-			self.x1,
-			self.x2,
-			self.y1,
-			self.y2,
-			self.z1,
-			self.z2,
-			self.command,
-			self.volume(),
-		)
-	}
 }
 
 impl Region {
