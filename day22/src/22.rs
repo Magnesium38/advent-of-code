@@ -39,8 +39,8 @@ fn parse_input(input: &str) -> impl Iterator<Item = Region> + '_ {
 
 fn solve<T: Iterator<Item = Region>>(regions: T) -> isize {
 	let mut new_regions: Vec<Region> = Vec::new();
+	let mut to_add = Vec::new();
 	for region in regions {
-		let mut to_add = Vec::new();
 		for existing_region in &new_regions {
 			if existing_region.intersects(region) {
 				let ix1 = existing_region.x1.max(region.x1);
@@ -67,7 +67,7 @@ fn solve<T: Iterator<Item = Region>>(regions: T) -> isize {
 			to_add.push(region);
 		}
 
-		new_regions.extend(to_add);
+		new_regions.extend(to_add.drain(0..));
 	}
 
 	new_regions
