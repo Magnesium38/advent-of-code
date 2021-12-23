@@ -1,5 +1,5 @@
 test:
-	cargo test --locked --bins --lib --workspace
+	cargo test --locked --bins --lib --workspace --release
 
 lint:
 	cargo clippy --locked --workspace -- -D warnings
