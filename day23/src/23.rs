@@ -36,10 +36,7 @@ fn parse<const N: usize>(input: &str) -> State<N> {
 		.skip(2)
 		.map(|line| {
 			line.chars()
-				.filter(|c| match c {
-					'A'..='D' => true,
-					_ => false,
-				})
+				.filter(|c| matches!(c, 'A'..='D'))
 				.map(Amphipod::parse)
 				.collect_vec()
 		})
@@ -50,8 +47,8 @@ fn parse<const N: usize>(input: &str) -> State<N> {
 		cells: [None; N],
 	}; 4];
 
-	for i in 0..4 {
-		rooms[i].id = match i {
+	for (i, room) in rooms.iter_mut().enumerate() {
+		room.id = match i {
 			0 => Amphipod::Amber,
 			1 => Amphipod::Bronze,
 			2 => Amphipod::Copper,
@@ -59,8 +56,8 @@ fn parse<const N: usize>(input: &str) -> State<N> {
 			_ => unreachable!(),
 		};
 
-		for j in 0..2 {
-			rooms[i].cells[j] = Some(input[j][i]);
+		for (j, v) in input.iter().enumerate().take(2) {
+			room.cells[j] = Some(v[i]);
 		}
 	}
 
@@ -142,21 +139,11 @@ impl Display for Amphipod {
 	}
 }
 
-#[derive(Clone, Copy, Debug, Eq, Hash)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 struct State<const N: usize> {
 	cost: usize,
 	hallway: [Option<Amphipod>; 11],
 	rooms: [Room<N>; 4],
-}
-
-impl<const N: usize> PartialEq for State<N> {
-	fn eq(&self, other: &Self) -> bool {
-		self.hallway == other.hallway
-			&& self.rooms[0] == other.rooms[0]
-			&& self.rooms[1] == other.rooms[1]
-			&& self.rooms[2] == other.rooms[2]
-			&& self.rooms[3] == other.rooms[3]
-	}
 }
 
 impl<const N: usize> PartialOrd for State<N> {
