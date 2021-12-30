@@ -32,6 +32,72 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8b26702f315f53b6071259e15dd9d64528213b44d61de1ec926eca7715d62203"
 
 [[package]]
+name = "aoc2015"
+version = "0.0.0"
+dependencies = [
+ "advent",
+ "anyhow",
+ "hashbrown",
+ "itertools",
+ "prettytable-rs",
+]
+
+[[package]]
+name = "aoc2016"
+version = "0.0.0"
+dependencies = [
+ "advent",
+ "anyhow",
+ "hashbrown",
+ "itertools",
+ "prettytable-rs",
+]
+
+[[package]]
+name = "aoc2017"
+version = "0.0.0"
+dependencies = [
+ "advent",
+ "anyhow",
+ "hashbrown",
+ "itertools",
+ "prettytable-rs",
+]
+
+[[package]]
+name = "aoc2018"
+version = "0.0.0"
+dependencies = [
+ "advent",
+ "anyhow",
+ "hashbrown",
+ "itertools",
+ "prettytable-rs",
+]
+
+[[package]]
+name = "aoc2019"
+version = "0.0.0"
+dependencies = [
+ "advent",
+ "anyhow",
+ "hashbrown",
+ "itertools",
+ "prettytable-rs",
+]
+
+[[package]]
+name = "aoc2020"
+version = "0.0.0"
+dependencies = [
+ "advent",
+ "anyhow",
+ "hashbrown",
+ "itertools",
+ "prettytable-rs",
+]
+
+[[package]]
 name = "aoc2021"
 version = "0.0.0"
 dependencies = [
@@ -77,39 +143,6 @@ name = "base64"
 version = "0.13.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "904dfeac50f3cdaba28fc6f57fdcddb75f49ed61346676a78c4ffe55877802fd"
-
-[[package]]
-name = "benchmark"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "day01",
- "day02",
- "day03",
- "day04",
- "day05",
- "day06",
- "day07",
- "day08",
- "day09",
- "day10",
- "day11",
- "day12",
- "day13",
- "day14",
- "day15",
- "day16",
- "day17",
- "day18",
- "day19",
- "day20",
- "day21",
- "day22",
- "day23",
- "day24",
- "day25",
- "prettytable-rs",
-]
 
 [[package]]
 name = "bitflags"
@@ -222,261 +255,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2b2466559f260f48ad25fe6317b3c8dac77b5bdb5763ac7d9d6103530663bc90"
 dependencies = [
  "memchr",
-]
-
-[[package]]
-name = "day01"
-version = "0.1.0"
-dependencies = [
- "advent",
- "anyhow",
- "itertools",
-]
-
-[[package]]
-name = "day02"
-version = "0.1.0"
-dependencies = [
- "advent",
- "anyhow",
-]
-
-[[package]]
-name = "day03"
-version = "0.1.0"
-dependencies = [
- "advent",
- "anyhow",
-]
-
-[[package]]
-name = "day04"
-version = "0.1.0"
-dependencies = [
- "advent",
- "anyhow",
- "itertools",
- "retain_mut",
-]
-
-[[package]]
-name = "day05"
-version = "0.1.0"
-dependencies = [
- "advent",
- "anyhow",
- "hashbrown",
- "itertools",
-]
-
-[[package]]
-name = "day06"
-version = "0.1.0"
-dependencies = [
- "advent",
- "anyhow",
- "hashbrown",
- "itertools",
-]
-
-[[package]]
-name = "day07"
-version = "0.1.0"
-dependencies = [
- "advent",
- "anyhow",
- "hashbrown",
- "itertools",
-]
-
-[[package]]
-name = "day08"
-version = "0.1.0"
-dependencies = [
- "advent",
- "anyhow",
- "hashbrown",
- "itertools",
-]
-
-[[package]]
-name = "day09"
-version = "0.1.0"
-dependencies = [
- "advent",
- "anyhow",
- "hashbrown",
- "itertools",
-]
-
-[[package]]
-name = "day10"
-version = "0.1.0"
-dependencies = [
- "advent",
- "anyhow",
- "hashbrown",
- "itertools",
-]
-
-[[package]]
-name = "day11"
-version = "0.1.0"
-dependencies = [
- "advent",
- "anyhow",
- "hashbrown",
- "itertools",
-]
-
-[[package]]
-name = "day12"
-version = "0.1.0"
-dependencies = [
- "advent",
- "anyhow",
- "hashbrown",
- "itertools",
-]
-
-[[package]]
-name = "day13"
-version = "0.1.0"
-dependencies = [
- "advent",
- "anyhow",
- "hashbrown",
- "itertools",
-]
-
-[[package]]
-name = "day14"
-version = "0.1.0"
-dependencies = [
- "advent",
- "anyhow",
- "hashbrown",
- "itertools",
-]
-
-[[package]]
-name = "day15"
-version = "0.1.0"
-dependencies = [
- "advent",
- "anyhow",
- "hashbrown",
- "itertools",
-]
-
-[[package]]
-name = "day16"
-version = "0.1.0"
-dependencies = [
- "advent",
- "anyhow",
- "hashbrown",
- "itertools",
-]
-
-[[package]]
-name = "day17"
-version = "0.1.0"
-dependencies = [
- "advent",
- "anyhow",
- "hashbrown",
- "itertools",
-]
-
-[[package]]
-name = "day18"
-version = "0.1.0"
-dependencies = [
- "advent",
- "anyhow",
- "hashbrown",
- "itertools",
-]
-
-[[package]]
-name = "day19"
-version = "0.1.0"
-dependencies = [
- "advent",
- "anyhow",
- "hashbrown",
- "itertools",
-]
-
-[[package]]
-name = "day20"
-version = "0.1.0"
-dependencies = [
- "advent",
- "anyhow",
- "hashbrown",
- "itertools",
-]
-
-[[package]]
-name = "day21"
-version = "0.1.0"
-dependencies = [
- "advent",
- "anyhow",
- "hashbrown",
- "itertools",
-]
-
-[[package]]
-name = "day22"
-version = "0.1.0"
-dependencies = [
- "advent",
- "anyhow",
- "hashbrown",
- "itertools",
-]
-
-[[package]]
-name = "day23"
-version = "0.1.0"
-dependencies = [
- "advent",
- "anyhow",
- "hashbrown",
- "itertools",
-]
-
-[[package]]
-name = "day24"
-version = "0.1.0"
-dependencies = [
- "advent",
- "anyhow",
- "hashbrown",
- "itertools",
-]
-
-[[package]]
-name = "day25"
-version = "0.1.0"
-dependencies = [
- "advent",
- "anyhow",
- "hashbrown",
- "itertools",
-]
-
-[[package]]
-name = "dayadvent_day"
-version = "0.1.0"
-dependencies = [
- "advent",
- "anyhow",
- "hashbrown",
- "itertools",
 ]
 
 [[package]]

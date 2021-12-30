@@ -85,14 +85,14 @@ impl Packet {
 	}
 }
 
-fn parse_packet(mut input: &mut Chars) -> anyhow::Result<Packet> {
-	let version = u8::from_str_radix(&take(&mut input, 3), 2)?;
-	let type_id = u8::from_str_radix(&take(&mut input, 3), 2)?;
+fn parse_packet(input: &mut Chars) -> anyhow::Result<Packet> {
+	let version = u8::from_str_radix(&take(input, 3), 2)?;
+	let type_id = u8::from_str_radix(&take(input, 3), 2)?;
 	let mut subpackets = None;
 	let mut literal = None;
 
 	if type_id == 4 {
-		literal = Some(read_literal(&mut input));
+		literal = Some(read_literal(input));
 
 		return Ok(Packet {
 			version,
@@ -101,20 +101,20 @@ fn parse_packet(mut input: &mut Chars) -> anyhow::Result<Packet> {
 			literal,
 		});
 	} else {
-		let length_type_id = take(&mut input, 1);
+		let length_type_id = take(input, 1);
 		let mut packets = Vec::new();
 
 		if length_type_id == "0" {
-			let total_length = usize::from_str_radix(&take(&mut input, 15), 2)?;
+			let total_length = usize::from_str_radix(&take(input, 15), 2)?;
 			let subpackets: String = input.take(total_length).collect();
 			let mut input = subpackets.chars();
 			while let Ok(packet) = parse_packet(&mut input) {
 				packets.push(packet);
 			}
 		} else {
-			let mut subpacket_count = usize::from_str_radix(&take(&mut input, 11), 2)?;
+			let mut subpacket_count = usize::from_str_radix(&take(input, 11), 2)?;
 			while subpacket_count > 0 {
-				let subpacket = parse_packet(&mut input)?;
+				let subpacket = parse_packet(input)?;
 				packets.push(subpacket);
 				subpacket_count -= 1;
 			}
@@ -131,13 +131,13 @@ fn parse_packet(mut input: &mut Chars) -> anyhow::Result<Packet> {
 	})
 }
 
-fn read_literal(mut input: &mut Chars) -> usize {
+fn read_literal(input: &mut Chars) -> usize {
 	let mut literal = String::new();
 
 	loop {
-		let is_last_group = take(&mut input, 1) == "0";
+		let is_last_group = take(input, 1) == "0";
 
-		literal.push_str(&take(&mut input, 4));
+		literal.push_str(&take(input, 4));
 
 		if is_last_group {
 			break;

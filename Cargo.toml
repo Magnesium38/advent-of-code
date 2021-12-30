@@ -8,9 +8,6 @@ default-run = "advent"
 
 [workspace]
 members = [
-	"benchmark",
-	"template",
-	"day*",
 	"aoc*",
 ]
 

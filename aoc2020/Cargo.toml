@@ -1,0 +1,15 @@
+[package]
+name = "aoc2020"
+version = "0.0.0"
+edition = "2021"
+default-run = "aoc2020"
+
+[lib]
+doctest = false
+
+[dependencies]
+anyhow = "1.0.51"
+advent = { path = "../" }
+hashbrown = "0.11.2"
+itertools = "0.10.1"
+prettytable-rs = "0.8.0"
