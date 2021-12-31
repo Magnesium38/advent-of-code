@@ -1,15 +1,36 @@
-pub fn pt1(_input: &str) -> anyhow::Result<isize> {
-	Ok(0)
+use md5::compute;
+
+pub fn pt1(input: &str) -> anyhow::Result<isize> {
+	find_prefix(input, "00000")
 }
 
-pub fn pt2(_input: &str) -> anyhow::Result<isize> {
-	Ok(0)
+pub fn pt2(input: &str) -> anyhow::Result<isize> {
+	find_prefix(input, "000000")
 }
 
+fn find_prefix(input: &str, prefix: &str) -> anyhow::Result<isize> {
+	let bytes = (0..prefix.len() / 2 * 2)
+		.step_by(2)
+		.map(|i| u8::from_str_radix(&prefix[i..i + 2], 16))
+		.collect::<Result<Vec<_>, _>>()?;
 
-advent::problem!(
+	for n in 0.. {
+		let hash = compute(format!("{}{}", input, n));
+
+		if bytes.iter().zip(hash.iter()).all(|(b, h)| b == h) {
+			if format!("{:x}", hash).starts_with(prefix) {
+				return Ok(n);
+			}
+		}
+	}
+
+	unreachable!()
+}
+
+advent::expensive_problem! {
 	r#"
-    "#,
-	0,
-	0,
-);
+		abcdef
+	"#,
+	609043,
+	6742839,
+}
