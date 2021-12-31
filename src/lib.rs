@@ -84,8 +84,8 @@ macro_rules! main {
 }
 
 #[macro_export]
-macro_rules! test {
-	($input: expr, $pt1: expr, $pt2: expr) => {
+macro_rules! problem {
+	($input:expr, $pt1:expr, $pt2:expr, $(,)*) => {
 		#[cfg(test)]
 		mod tests {
 			use super::*;
@@ -113,9 +113,31 @@ macro_rules! test {
 }
 
 #[macro_export]
-macro_rules! problem {
-	($test_input:expr, $pt1_answer:expr, $pt2_answer:expr, $(,)*) => {
-		advent::test!($test_input, $pt1_answer, $pt2_answer);
+macro_rules! expensive_problem {
+	($input: expr, $pt1: expr, $pt2: expr, $(,)*) => {
+		#[cfg(test)]
+		mod tests {
+			use super::*;
+
+			fn prepare_input<'a>(input: &'a str) -> String {
+				input
+					.trim()
+					.lines()
+					.map(|line| line.trim())
+					.collect::<Vec<_>>()
+					.join("\n")
+			}
+
+			#[test] #[ignore]
+			fn test_pt1() {
+				assert_eq!(pt1(&prepare_input($input)).unwrap(), $pt1);
+			}
+
+			#[test] #[ignore]
+			fn test_pt2() {
+				assert_eq!(pt2(&prepare_input($input)).unwrap(), $pt2);
+			}
+		}
 	};
 }
 
