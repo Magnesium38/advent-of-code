@@ -17,10 +17,10 @@ fn find_prefix(input: &str, prefix: &str) -> anyhow::Result<isize> {
 	for n in 0.. {
 		let hash = compute(format!("{}{}", input, n));
 
-		if bytes.iter().zip(hash.iter()).all(|(b, h)| b == h) {
-			if format!("{:x}", hash).starts_with(prefix) {
-				return Ok(n);
-			}
+		if bytes.iter().zip(hash.iter()).all(|(b, h)| b == h)
+			&& format!("{:x}", hash).starts_with(prefix)
+		{
+			return Ok(n);
 		}
 	}
 
