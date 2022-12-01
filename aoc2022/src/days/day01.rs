@@ -1,25 +1,18 @@
 use itertools::Itertools;
 
+fn groups(input: &str) -> impl Iterator<Item = isize> + '_ {
+	input
+		.split("\n\n")
+		.map(|group| group.lines().map(|s| s.parse().unwrap_or(0)).sum())
+}
+
 pub fn pt1(input: &str) -> anyhow::Result<isize> {
-	Ok(input
-		.lines()
-		.map(|s| s.parse::<isize>())
-		.group_by(|s| s.is_ok())
-		.into_iter()
-		.map(|group| group.1.map(|el| el.unwrap_or(0)).sum::<isize>())
-		.max()
-		.unwrap())
+	Ok(groups(input).max().unwrap())
 }
 
 pub fn pt2(input: &str) -> anyhow::Result<isize> {
-	Ok(input
-		.lines()
-		.map(|s| s.parse::<isize>())
-		.group_by(|s| s.is_ok())
-		.into_iter()
-		.map(|group| group.1.map(|el| el.unwrap_or(0)).sum::<isize>())
-		.sorted()
-		.rev()
+	Ok(groups(input)
+		.sorted_unstable_by(|a, b| b.cmp(a))
 		.take(3)
 		.sum())
 }
