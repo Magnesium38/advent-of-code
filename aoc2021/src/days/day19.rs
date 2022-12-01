@@ -164,7 +164,7 @@ fn solve(input: &str) -> anyhow::Result<(usize, isize)> {
 		)
 		.max()
 		.map(|max| (map.len(), max))
-		.ok_or(anyhow::anyhow!("no solution found"))
+		.ok_or_else(|| anyhow::anyhow!("no solution found"))
 }
 
 fn fingerprint(p1: &Point, p2: &Point) -> Fingerprint {

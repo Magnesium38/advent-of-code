@@ -55,7 +55,7 @@ fn initialize_points(input: &str) -> Vec<Point> {
 
 fn apply_fold(points: Vec<Point>, instruction: &str) -> Vec<Point> {
 	let is_x = instruction.contains("x=");
-	let (_, line) = instruction.split_once("=").unwrap();
+	let (_, line) = instruction.split_once('=').unwrap();
 	let line = line.parse::<isize>().unwrap();
 
 	points

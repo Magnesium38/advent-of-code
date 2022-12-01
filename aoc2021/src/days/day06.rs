@@ -2,14 +2,14 @@ pub fn pt1(input: &str) -> anyhow::Result<isize> {
 	World::new(input.split(',').map(|s| s.parse().unwrap()))
 		.take(80)
 		.last()
-		.ok_or(anyhow::anyhow!("no output"))
+		.ok_or_else(|| anyhow::anyhow!("no output"))
 }
 
 pub fn pt2(input: &str) -> anyhow::Result<isize> {
 	World::new(input.split(',').map(|s| s.parse().unwrap()))
 		.take(256)
 		.last()
-		.ok_or(anyhow::anyhow!("no output"))
+		.ok_or_else(|| anyhow::anyhow!("no output"))
 }
 
 struct World([isize; 9]);

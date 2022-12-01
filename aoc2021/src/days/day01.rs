@@ -17,7 +17,7 @@ pub fn pt2(input: &str) -> anyhow::Result<isize> {
 fn count_decreases<I: Iterator<Item = isize>>(input: I) -> anyhow::Result<isize> {
 	Ok(input
 		.tuple_windows::<(isize, isize)>()
-		.map(|(a, b)| if a < b { 1 } else { 0 })
+		.map(|(a, b)| isize::from(a < b))
 		.sum())
 }
 

@@ -15,7 +15,7 @@ pub fn pt1(input: &str) -> anyhow::Result<usize> {
 		.into_iter()
 		.reduce(|acc, snailfish| &acc + &snailfish)
 		.map(|snailfish| snailfish.magnitude())
-		.ok_or(anyhow::anyhow!("No magnitude found"))
+		.ok_or_else(|| anyhow::anyhow!("No magnitude found"))
 }
 
 pub fn pt2(input: &str) -> anyhow::Result<usize> {
@@ -33,7 +33,7 @@ pub fn pt2(input: &str) -> anyhow::Result<usize> {
 		.tuple_combinations::<(_, _)>()
 		.map(|(a, b)| (&a + &b).magnitude().max((&b + &a).magnitude()))
 		.max()
-		.ok_or(anyhow::anyhow!("No maximum found"))
+		.ok_or_else(|| anyhow::anyhow!("No maximum found"))
 }
 
 #[derive(Clone, Debug, PartialEq)]

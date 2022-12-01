@@ -4,7 +4,7 @@ use std::{fs::read_to_string, path::PathBuf};
 fn main() -> anyhow::Result<()> {
 	let day = std::env::args()
 		.nth(1)
-		.ok_or(anyhow::anyhow!("missing day"))?
+		.ok_or_else(|| anyhow::anyhow!("missing day"))?
 		.parse::<isize>()?;
 
 	if !(1..=25).contains(&day) {

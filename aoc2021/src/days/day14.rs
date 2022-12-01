@@ -5,14 +5,14 @@ pub fn pt1(input: &str) -> anyhow::Result<usize> {
 	Solver::new(input)
 		.take(10)
 		.last()
-		.ok_or(anyhow::anyhow!("no solution"))
+		.ok_or_else(|| anyhow::anyhow!("no solution"))
 }
 
 pub fn pt2(input: &str) -> anyhow::Result<usize> {
 	Solver::new(input)
 		.take(40)
 		.last()
-		.ok_or(anyhow::anyhow!("no solution"))
+		.ok_or_else(|| anyhow::anyhow!("no solution"))
 }
 
 struct Solver {

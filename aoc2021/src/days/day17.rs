@@ -32,8 +32,8 @@ pub fn pt2(input: &str) -> anyhow::Result<usize> {
 fn get_bounds(input: &str) -> anyhow::Result<((isize, isize), (isize, isize))> {
 	let (_, input) = input.split_once(": ").unwrap();
 	let (x_range, y_range) = input.split_once(", ").unwrap();
-	let (_, x_range) = x_range.split_once("=").unwrap();
-	let (_, y_range) = y_range.split_once("=").unwrap();
+	let (_, x_range) = x_range.split_once('=').unwrap();
+	let (_, y_range) = y_range.split_once('=').unwrap();
 	let (x_min, x_max) = x_range.split_once("..").unwrap();
 	let (y_min, y_max) = y_range.split_once("..").unwrap();
 

@@ -87,7 +87,7 @@ impl<'a> Alu<'a> {
 		let mut number = number.chars();
 
 		self.input.lines().for_each(|line| {
-			if let Some((command, args)) = line.split_once(" ") {
+			if let Some((command, args)) = line.split_once(' ') {
 				match command {
 					"inp" => match args {
 						"w" => self.w = number.next().unwrap().to_digit(10).unwrap() as isize,
@@ -98,7 +98,7 @@ impl<'a> Alu<'a> {
 					},
 
 					"add" => {
-						let (a, b) = args.split_once(" ").unwrap();
+						let (a, b) = args.split_once(' ').unwrap();
 						match (a, b) {
 							("w", "x") => self.w += self.x,
 							("w", "y") => self.w += self.y,
@@ -125,7 +125,7 @@ impl<'a> Alu<'a> {
 					}
 
 					"mul" => {
-						let (a, b) = args.split_once(" ").unwrap();
+						let (a, b) = args.split_once(' ').unwrap();
 						match (a, b) {
 							("w", "x") => self.w *= self.x,
 							("w", "y") => self.w *= self.y,
@@ -152,7 +152,7 @@ impl<'a> Alu<'a> {
 					}
 
 					"div" => {
-						let (a, b) = args.split_once(" ").unwrap();
+						let (a, b) = args.split_once(' ').unwrap();
 						match (a, b) {
 							("w", "x") => self.w /= self.x,
 							("w", "y") => self.w /= self.y,
@@ -179,7 +179,7 @@ impl<'a> Alu<'a> {
 					}
 
 					"mod" => {
-						let (a, b) = args.split_once(" ").unwrap();
+						let (a, b) = args.split_once(' ').unwrap();
 						match (a, b) {
 							("w", "x") => self.w %= self.x,
 							("w", "y") => self.w %= self.y,
@@ -206,51 +206,27 @@ impl<'a> Alu<'a> {
 					}
 
 					"eql" => {
-						let (a, b) = args.split_once(" ").unwrap();
+						let (a, b) = args.split_once(' ').unwrap();
 						match (a, b) {
-							("w", "x") => self.w = if self.w == self.x { 1 } else { 0 },
-							("w", "y") => self.w = if self.w == self.y { 1 } else { 0 },
-							("w", "z") => self.w = if self.w == self.z { 1 } else { 0 },
-							("w", _) => {
-								self.w = if self.w == b.parse::<isize>().unwrap() {
-									1
-								} else {
-									0
-								}
-							}
+							("w", "x") => self.w = isize::from(self.w == self.x),
+							("w", "y") => self.w = isize::from(self.w == self.y),
+							("w", "z") => self.w = isize::from(self.w == self.z),
+							("w", _) => self.w = isize::from(self.w == b.parse::<isize>().unwrap()),
 
-							("x", "w") => self.x = if self.x == self.w { 1 } else { 0 },
-							("x", "y") => self.x = if self.x == self.y { 1 } else { 0 },
-							("x", "z") => self.x = if self.x == self.z { 1 } else { 0 },
-							("x", _) => {
-								self.x = if self.x == b.parse::<isize>().unwrap() {
-									1
-								} else {
-									0
-								}
-							}
+							("x", "w") => self.x = isize::from(self.x == self.w),
+							("x", "y") => self.x = isize::from(self.x == self.y),
+							("x", "z") => self.x = isize::from(self.x == self.z),
+							("x", _) => self.x = isize::from(self.x == b.parse::<isize>().unwrap()),
 
-							("y", "w") => self.y = if self.y == self.w { 1 } else { 0 },
-							("y", "x") => self.y = if self.y == self.x { 1 } else { 0 },
-							("y", "z") => self.y = if self.y == self.z { 1 } else { 0 },
-							("y", _) => {
-								self.y = if self.y == b.parse::<isize>().unwrap() {
-									1
-								} else {
-									0
-								}
-							}
+							("y", "w") => self.y = isize::from(self.y == self.w),
+							("y", "x") => self.y = isize::from(self.y == self.x),
+							("y", "z") => self.y = isize::from(self.y == self.z),
+							("y", _) => self.y = isize::from(self.y == b.parse::<isize>().unwrap()),
 
-							("z", "w") => self.z = if self.z == self.w { 1 } else { 0 },
-							("z", "x") => self.z = if self.z == self.x { 1 } else { 0 },
-							("z", "y") => self.z = if self.z == self.y { 1 } else { 0 },
-							("z", _) => {
-								self.z = if self.z == b.parse::<isize>().unwrap() {
-									1
-								} else {
-									0
-								}
-							}
+							("z", "w") => self.z = isize::from(self.z == self.w),
+							("z", "x") => self.z = isize::from(self.z == self.x),
+							("z", "y") => self.z = isize::from(self.z == self.y),
+							("z", _) => self.z = isize::from(self.z == b.parse::<isize>().unwrap()),
 
 							_ => unreachable!(),
 						}

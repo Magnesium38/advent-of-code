@@ -80,7 +80,7 @@ fn main() -> anyhow::Result<()> {
 		.map(
 			|&(day, (pt1_min, pt1_max, pt1_avg), (pt2_min, pt2_max, pt2_avg))| {
 				Ok(vec![
-					Cell::new(&day.to_string()),
+					Cell::new(day),
 					make_cell(pt1_min),
 					make_cell(pt1_max),
 					make_cell(pt1_avg),
@@ -132,9 +132,11 @@ fn main() -> anyhow::Result<()> {
 	Ok(())
 }
 
+type BoxedFunction<'a> = dyn Fn(&str) -> anyhow::Result<()> + 'a;
+
 fn wrap_fn<T>(
 	f: &dyn Fn(&str) -> anyhow::Result<T>,
-) -> Box<dyn Fn(&str) -> anyhow::Result<()> + '_> {
+) -> Box<BoxedFunction<'_>> {
 	Box::new(|input: &str| {
 		f(input)?;
 

@@ -3,14 +3,14 @@ pub fn pt1(input: &str) -> anyhow::Result<isize> {
 		.take(100)
 		.map(|(i, _)| i)
 		.last()
-		.ok_or(anyhow::anyhow!("no output"))
+		.ok_or_else(|| anyhow::anyhow!("no output"))
 }
 
 pub fn pt2(input: &str) -> anyhow::Result<usize> {
 	let (generation, _) = World::new(input)
 		.enumerate()
 		.find(|(_, (_, a))| *a == 100)
-		.ok_or(anyhow::anyhow!("no output"))?;
+		.ok_or_else(|| anyhow::anyhow!("no output"))?;
 
 	Ok(generation + 1)
 }

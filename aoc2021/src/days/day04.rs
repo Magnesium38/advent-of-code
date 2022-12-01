@@ -1,5 +1,4 @@
 use itertools::Itertools;
-use retain_mut::RetainMut;
 
 pub fn pt1(input: &str) -> anyhow::Result<isize> {
 	for state in Bingo::from(input.lines().filter(|line| !line.is_empty()))? {
