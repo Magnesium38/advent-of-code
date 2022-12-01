@@ -23,6 +23,7 @@ fn main() -> anyhow::Result<()> {
 	let mut response = client
 		.get(format!("https://adventofcode.com/2022/day/{}/input", day))
 		.header("Cookie", format!("session={}", session))
+		.header("User-Agent", "github.com/Magnesium38/advent-of-code")
 		.send()?;
 
 	if !response.status().is_success() {
