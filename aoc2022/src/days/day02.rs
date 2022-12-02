@@ -1,5 +1,3 @@
-use itertools::Itertools;
-
 #[derive(Clone, Copy)]
 enum Rps {
 	Rock,
@@ -28,16 +26,16 @@ fn score((opponent, player): (Rps, Rps)) -> isize {
 pub fn pt1(input: &str) -> anyhow::Result<isize> {
 	Ok(input
 		.lines()
-		.map(|s| match s.split(' ').collect_tuple().unwrap() {
-			("A", "X") => (Rps::Rock, Rps::Rock),
-			("A", "Y") => (Rps::Rock, Rps::Paper),
-			("A", "Z") => (Rps::Rock, Rps::Scissors),
-			("B", "X") => (Rps::Paper, Rps::Rock),
-			("B", "Y") => (Rps::Paper, Rps::Paper),
-			("B", "Z") => (Rps::Paper, Rps::Scissors),
-			("C", "X") => (Rps::Scissors, Rps::Rock),
-			("C", "Y") => (Rps::Scissors, Rps::Paper),
-			("C", "Z") => (Rps::Scissors, Rps::Scissors),
+		.map(|s| match (s.as_bytes()[0], s.as_bytes()[2]) {
+			(b'A', b'X') => (Rps::Rock, Rps::Rock),
+			(b'A', b'Y') => (Rps::Rock, Rps::Paper),
+			(b'A', b'Z') => (Rps::Rock, Rps::Scissors),
+			(b'B', b'X') => (Rps::Paper, Rps::Rock),
+			(b'B', b'Y') => (Rps::Paper, Rps::Paper),
+			(b'B', b'Z') => (Rps::Paper, Rps::Scissors),
+			(b'C', b'X') => (Rps::Scissors, Rps::Rock),
+			(b'C', b'Y') => (Rps::Scissors, Rps::Paper),
+			(b'C', b'Z') => (Rps::Scissors, Rps::Scissors),
 			_ => unreachable!(),
 		})
 		.map(score)
@@ -47,16 +45,16 @@ pub fn pt1(input: &str) -> anyhow::Result<isize> {
 pub fn pt2(input: &str) -> anyhow::Result<isize> {
 	Ok(input
 		.lines()
-		.map(|s| match s.split(' ').collect_tuple().unwrap() {
-			("A", "X") => (Rps::Rock, Rps::Scissors),
-			("A", "Y") => (Rps::Rock, Rps::Rock),
-			("A", "Z") => (Rps::Rock, Rps::Paper),
-			("B", "X") => (Rps::Paper, Rps::Rock),
-			("B", "Y") => (Rps::Paper, Rps::Paper),
-			("B", "Z") => (Rps::Paper, Rps::Scissors),
-			("C", "X") => (Rps::Scissors, Rps::Paper),
-			("C", "Y") => (Rps::Scissors, Rps::Scissors),
-			("C", "Z") => (Rps::Scissors, Rps::Rock),
+		.map(|s| match (s.as_bytes()[0], s.as_bytes()[2]) {
+			(b'A', b'X') => (Rps::Rock, Rps::Scissors),
+			(b'A', b'Y') => (Rps::Rock, Rps::Rock),
+			(b'A', b'Z') => (Rps::Rock, Rps::Paper),
+			(b'B', b'X') => (Rps::Paper, Rps::Rock),
+			(b'B', b'Y') => (Rps::Paper, Rps::Paper),
+			(b'B', b'Z') => (Rps::Paper, Rps::Scissors),
+			(b'C', b'X') => (Rps::Scissors, Rps::Paper),
+			(b'C', b'Y') => (Rps::Scissors, Rps::Scissors),
+			(b'C', b'Z') => (Rps::Scissors, Rps::Rock),
 			_ => unreachable!(),
 		})
 		.map(score)
