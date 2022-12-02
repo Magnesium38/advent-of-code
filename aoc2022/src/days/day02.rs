@@ -1,6 +1,6 @@
 use std::ops::Sub;
 
-#[derive(PartialEq, PartialOrd, Copy, Clone)]
+#[derive(PartialEq, Copy, Clone)]
 enum Rps {
 	Rock,
 	Paper,
@@ -11,21 +11,17 @@ impl Sub for Rps {
 	type Output = isize;
 
 	fn sub(self, rhs: Self) -> Self::Output {
-		if self == rhs {
-			return 3;
+		match (self, rhs) {
+			(Rps::Rock, Rps::Rock) => 3,
+			(Rps::Rock, Rps::Scissors) => 0,
+			(Rps::Rock, Rps::Paper) => 6,
+			(Rps::Paper, Rps::Rock) => 0,
+			(Rps::Paper, Rps::Scissors) => 6,
+			(Rps::Paper, Rps::Paper) => 3,
+			(Rps::Scissors, Rps::Rock) => 6,
+			(Rps::Scissors, Rps::Scissors) => 3,
+			(Rps::Scissors, Rps::Paper) => 0,
 		}
-
-		if self == Rps::Rock {
-			return if rhs == Rps::Paper { 6 } else { 0 };
-		}
-		if self == Rps::Paper {
-			return if rhs == Rps::Scissors { 6 } else { 0 };
-		}
-		if self == Rps::Scissors {
-			return if rhs == Rps::Rock { 6 } else { 0 };
-		}
-
-		unreachable!()
 	}
 }
 
