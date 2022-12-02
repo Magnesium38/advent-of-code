@@ -1,5 +1,7 @@
 use std::ops::Sub;
 
+use itertools::Itertools;
+
 #[derive(PartialEq, Copy, Clone)]
 enum Rps {
 	Rock,
@@ -37,21 +39,17 @@ fn score((opponent, player): (Rps, Rps)) -> isize {
 pub fn pt1(input: &str) -> anyhow::Result<isize> {
 	Ok(input
 		.lines()
-		.map(|s| {
-			(
-				match s.chars().next().unwrap() {
-					'A' => Rps::Rock,
-					'B' => Rps::Paper,
-					'C' => Rps::Scissors,
-					_ => unreachable!(),
-				},
-				match s.chars().nth(2).unwrap() {
-					'X' => Rps::Rock,
-					'Y' => Rps::Paper,
-					'Z' => Rps::Scissors,
-					_ => unreachable!(),
-				},
-			)
+		.map(|s| match s.split(' ').collect_tuple().unwrap() {
+			("A", "X") => (Rps::Rock, Rps::Rock),
+			("A", "Y") => (Rps::Rock, Rps::Paper),
+			("A", "Z") => (Rps::Rock, Rps::Scissors),
+			("B", "X") => (Rps::Paper, Rps::Rock),
+			("B", "Y") => (Rps::Paper, Rps::Paper),
+			("B", "Z") => (Rps::Paper, Rps::Scissors),
+			("C", "X") => (Rps::Scissors, Rps::Rock),
+			("C", "Y") => (Rps::Scissors, Rps::Paper),
+			("C", "Z") => (Rps::Scissors, Rps::Scissors),
+			_ => unreachable!(),
 		})
 		.map(score)
 		.sum())
@@ -60,35 +58,17 @@ pub fn pt1(input: &str) -> anyhow::Result<isize> {
 pub fn pt2(input: &str) -> anyhow::Result<isize> {
 	Ok(input
 		.lines()
-		.map(|s| {
-			let opponent = match s.chars().next().unwrap() {
-				'A' => Rps::Rock,
-				'B' => Rps::Paper,
-				'C' => Rps::Scissors,
-				_ => unreachable!(),
-			};
-
-			(
-				opponent,
-				match s.chars().nth(2).unwrap() {
-					'X' => match opponent {
-						Rps::Rock => Rps::Scissors,
-						Rps::Paper => Rps::Rock,
-						Rps::Scissors => Rps::Paper,
-					},
-					'Y' => match opponent {
-						Rps::Rock => Rps::Rock,
-						Rps::Paper => Rps::Paper,
-						Rps::Scissors => Rps::Scissors,
-					},
-					'Z' => match opponent {
-						Rps::Rock => Rps::Paper,
-						Rps::Paper => Rps::Scissors,
-						Rps::Scissors => Rps::Rock,
-					},
-					_ => unreachable!(),
-				},
-			)
+		.map(|s| match s.split(' ').collect_tuple().unwrap() {
+			("A", "X") => (Rps::Rock, Rps::Scissors),
+			("A", "Y") => (Rps::Rock, Rps::Rock),
+			("A", "Z") => (Rps::Rock, Rps::Paper),
+			("B", "X") => (Rps::Paper, Rps::Rock),
+			("B", "Y") => (Rps::Paper, Rps::Paper),
+			("B", "Z") => (Rps::Paper, Rps::Scissors),
+			("C", "X") => (Rps::Scissors, Rps::Paper),
+			("C", "Y") => (Rps::Scissors, Rps::Scissors),
+			("C", "Z") => (Rps::Scissors, Rps::Rock),
+			_ => unreachable!(),
 		})
 		.map(score)
 		.sum())
