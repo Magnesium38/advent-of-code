@@ -40,7 +40,7 @@ pub fn pt1(input: &str) -> anyhow::Result<isize> {
 					'C' => Rps::Scissors,
 					_ => unreachable!(),
 				},
-				match s.chars().skip(2).next().unwrap() {
+				match s.chars().nth(2).unwrap() {
 					'X' => Rps::Rock,
 					'Y' => Rps::Paper,
 					'Z' => Rps::Scissors,
@@ -72,7 +72,7 @@ pub fn pt2(input: &str) -> anyhow::Result<isize> {
 
 			(
 				opponent,
-				match s.chars().skip(2).next().unwrap() {
+				match s.chars().nth(2).unwrap() {
 					'X' => match opponent {
 						Rps::Rock => Rps::Scissors,
 						Rps::Paper => Rps::Rock,
