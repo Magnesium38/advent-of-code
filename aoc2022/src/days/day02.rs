@@ -1,25 +1,17 @@
 pub fn pt1(input: &str) -> anyhow::Result<isize> {
 	Ok(input
-		.lines()
-		.map(|s| {
-			(
-				isize::from(s.as_bytes()[0] - b'A'),
-				isize::from(s.as_bytes()[2] - b'X'),
-			)
-		})
+		.as_bytes()
+		.chunks(4)
+		.map(|c| (isize::from(c[0] - b'A'), isize::from(c[2] - b'X')))
 		.map(|(a, b)| b + 1 + ((b - a + 1) % 3) * 3)
 		.sum())
 }
 
 pub fn pt2(input: &str) -> anyhow::Result<isize> {
 	Ok(input
-		.lines()
-		.map(|s| {
-			(
-				isize::from(s.as_bytes()[0] - b'A'),
-				isize::from(s.as_bytes()[2] - b'X'),
-			)
-		})
+		.as_bytes()
+		.chunks(4)
+		.map(|c| (isize::from(c[0] - b'A'), isize::from(c[2] - b'X')))
 		.map(|(a, b)| match b {
 			0 => (a - 1) % 3 + 1,
 			1 => (a + 1) + 3,
