@@ -25,6 +25,15 @@ impl Sub for Rps {
 	}
 }
 
+fn score((opponent, player): (Rps, Rps)) -> isize {
+	(opponent - player)
+		+ match player {
+			Rps::Rock => 1,
+			Rps::Paper => 2,
+			Rps::Scissors => 3,
+		}
+}
+
 pub fn pt1(input: &str) -> anyhow::Result<isize> {
 	Ok(input
 		.lines()
@@ -44,14 +53,7 @@ pub fn pt1(input: &str) -> anyhow::Result<isize> {
 				},
 			)
 		})
-		.map(|(a, b)| {
-			(a - b)
-				+ match b {
-					Rps::Rock => 1,
-					Rps::Paper => 2,
-					Rps::Scissors => 3,
-				}
-		})
+		.map(score)
 		.sum())
 }
 
@@ -88,14 +90,7 @@ pub fn pt2(input: &str) -> anyhow::Result<isize> {
 				},
 			)
 		})
-		.map(|(a, b)| {
-			(a - b)
-				+ match b {
-					Rps::Rock => 1,
-					Rps::Paper => 2,
-					Rps::Scissors => 3,
-				}
-		})
+		.map(score)
 		.sum())
 }
 
