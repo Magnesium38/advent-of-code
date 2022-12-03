@@ -21,11 +21,9 @@ fn find_common<'a, 'b, I: IntoIterator<Item = &'a str>>(iter: I) -> u32 {
 pub fn pt1(input: &str) -> anyhow::Result<u32> {
 	Ok(input
 		.lines()
-		.map(|line| {
-			let (a, b) = line.split_at(line.len() / 2);
-
-			find_common([a, b])
-		})
+		.map(|line| (line, line.len() / 2))
+		.map(|(line, midpoint)| [&line[0..midpoint], &line[midpoint..]])
+		.map(find_common)
 		.sum())
 }
 
