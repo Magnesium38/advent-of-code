@@ -6,7 +6,7 @@ fn encode(s: &str) -> u64 {
 			<< match el {
 				b'a'..=b'z' => (el - b'a') + 1,
 				b'A'..=b'Z' => (el - b'A') + 27,
-				_ => unreachable!(),
+				_ => unreachable!("invalid input character"),
 			}
 	})
 }
@@ -14,7 +14,7 @@ fn encode(s: &str) -> u64 {
 fn find_common<'a, I: Iterator<Item = &'a str>>(iter: I) -> u32 {
 	iter.map(encode)
 		.reduce(|acc, el| acc & el)
-		.unwrap()
+		.expect("expected at least one element")
 		.trailing_zeros()
 }
 

@@ -16,7 +16,7 @@ pub fn pt2(input: &str) -> anyhow::Result<isize> {
 			0 => (a - 1) % 3 + 1,
 			1 => (a + 1) + 3,
 			2 => ((a + 1) % 3 + 1) + 6,
-			_ => unreachable!(),
+			_ => unreachable!("invalid input character"),
 		})
 		.sum())
 }

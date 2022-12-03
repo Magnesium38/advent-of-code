@@ -7,7 +7,7 @@ fn groups(input: &str) -> impl Iterator<Item = isize> + '_ {
 }
 
 pub fn pt1(input: &str) -> anyhow::Result<isize> {
-	Ok(groups(input).max().unwrap())
+	Ok(groups(input).max().expect("at least one element was expected"))
 }
 
 pub fn pt2(input: &str) -> anyhow::Result<isize> {
