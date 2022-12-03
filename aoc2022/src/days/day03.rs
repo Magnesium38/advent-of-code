@@ -1,28 +1,32 @@
 use itertools::Itertools;
-use std::collections::HashSet;
 
-pub fn pt1(input: &str) -> anyhow::Result<isize> {
+fn temp(s: &str) -> u64 {
+	let mut n = 0;
+
+	for c in s.as_bytes() {
+		n |= 1
+			<< match c {
+				b'a'..=b'z' => (c - b'a') + 1,
+				b'A'..=b'Z' => (c - b'A') + 27,
+				_ => unreachable!(),
+			};
+	}
+
+	n
+}
+
+pub fn pt1(input: &str) -> anyhow::Result<u32> {
 	Ok(input
 		.lines()
 		.map(|line| {
 			let (a, b) = line.split_at(line.len() / 2);
 
-			let (a, b) = (
-				a.as_bytes().iter().collect::<HashSet<_>>(),
-				b.as_bytes().iter().collect::<HashSet<_>>(),
-			);
-
-			let c = a.intersection(&b).next().unwrap();
-			match c {
-				b'a'..=b'z' => isize::from((*c - b'a') + 1),
-				b'A'..=b'Z' => isize::from((*c - b'A') + 27),
-				_ => unreachable!(),
-			}
+			(temp(a) & temp(b)).trailing_zeros()
 		})
 		.sum())
 }
 
-pub fn pt2(input: &str) -> anyhow::Result<isize> {
+pub fn pt2(input: &str) -> anyhow::Result<u32> {
 	Ok(input
 		.lines()
 		.chunks(3)
@@ -30,20 +34,7 @@ pub fn pt2(input: &str) -> anyhow::Result<isize> {
 		.map(|chunk| {
 			let (a, b, c) = chunk.collect_tuple().unwrap();
 
-			let (a, b, c) = (
-				a.as_bytes().iter().cloned().collect::<HashSet<u8>>(),
-				b.as_bytes().iter().cloned().collect::<HashSet<u8>>(),
-				c.as_bytes().iter().cloned().collect::<HashSet<u8>>(),
-			);
-
-			let ab = a.intersection(&b).cloned().collect::<HashSet<u8>>();
-			let abc = ab.intersection(&c).next().unwrap();
-
-			match abc {
-				b'a'..=b'z' => isize::from((*abc - b'a') + 1),
-				b'A'..=b'Z' => isize::from((*abc - b'A') + 27),
-				_ => unreachable!(),
-			}
+			(temp(a) & temp(b) & temp(c)).trailing_zeros()
 		})
 		.sum())
 }
