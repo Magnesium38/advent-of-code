@@ -1,13 +1,12 @@
 use itertools::Itertools;
 
 fn encode(s: &str) -> u64 {
-	s.as_bytes().iter().fold(0u64, |n, el| {
-		n | 1
-			<< match el {
-				b'a'..=b'z' => (el - b'a') + 1,
-				b'A'..=b'Z' => (el - b'A') + 27,
-				_ => unreachable!("invalid input character"),
-			}
+	s.as_bytes().iter().fold(0u64, |n, c| {
+		1 << match c {
+			b'a'..=b'z' => (c - b'a') + 1,
+			b'A'..=b'Z' => (c - b'A') + 27,
+			_ => unreachable!("invalid input character"),
+		} | n
 	})
 }
 
