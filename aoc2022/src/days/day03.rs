@@ -10,8 +10,9 @@ fn encode(s: &str) -> u64 {
 	})
 }
 
-fn find_common<'a, I: Iterator<Item = &'a str>>(iter: I) -> u32 {
-	iter.map(encode)
+fn find_common<'a, 'b, I: IntoIterator<Item = &'a str>>(iter: I) -> u32 {
+	iter.into_iter()
+		.map(encode)
 		.reduce(|acc, el| acc & el)
 		.expect("expected at least one element")
 		.trailing_zeros()
@@ -23,7 +24,7 @@ pub fn pt1(input: &str) -> anyhow::Result<u32> {
 		.map(|line| {
 			let (a, b) = line.split_at(line.len() / 2);
 
-			find_common([a, b].iter().copied())
+			find_common([a, b])
 		})
 		.sum())
 }
