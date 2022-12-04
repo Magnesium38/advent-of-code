@@ -10,7 +10,7 @@ fn encode(s: &str) -> u64 {
 	})
 }
 
-fn find_common<'a, 'b, I: IntoIterator<Item = &'a str>>(iter: I) -> u32 {
+fn find_common<'a, I: IntoIterator<Item = &'a str>>(iter: I) -> u32 {
 	iter.into_iter()
 		.map(encode)
 		.reduce(|acc, el| acc & el)
