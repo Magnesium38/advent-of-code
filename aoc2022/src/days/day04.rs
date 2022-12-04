@@ -1,14 +1,16 @@
 use itertools::Itertools;
 
+fn parse_line(line: &str) -> (usize, usize, usize, usize) {
+	line.split([',', '-'])
+		.map(|n| n.parse::<usize>().expect("unable to parse input"))
+		.collect_tuple()
+		.expect("expected four elements")
+}
+
 pub fn pt1(input: &str) -> anyhow::Result<usize> {
 	Ok(input
 		.lines()
-		.map(|line| {
-			line.split([',', '-'])
-				.map(|n| n.parse::<usize>().expect("unable to parse input"))
-				.collect_tuple()
-				.expect("expected four elements")
-		})
+		.map(parse_line)
 		.filter(|(a1, a2, b1, b2)| (a1 <= b1 && a2 >= b2) || (b1 <= a1 && b2 >= a2))
 		.count())
 }
@@ -16,12 +18,7 @@ pub fn pt1(input: &str) -> anyhow::Result<usize> {
 pub fn pt2(input: &str) -> anyhow::Result<usize> {
 	Ok(input
 		.lines()
-		.map(|line| {
-			line.split([',', '-'])
-				.map(|n| n.parse::<usize>().expect("unable to parse input"))
-				.collect_tuple()
-				.expect("expected four elements")
-		})
+		.map(parse_line)
 		.filter(|(a1, a2, b1, b2)| {
 			(a1 <= b1 && a2 >= b1)
 				|| (a1 <= b2 && a2 >= b2)
