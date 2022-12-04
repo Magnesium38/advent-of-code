@@ -9,14 +9,7 @@ pub fn pt1(input: &str) -> anyhow::Result<usize> {
 				.collect_tuple()
 				.expect("expected four elements")
 		})
-		.map(|(a1, a2, b1, b2)| {
-			if b2 - b1 > a2 - a1 {
-				(b1, b2, a1, a2)
-			} else {
-				(a1, a2, b1, b2)
-			}
-		})
-		.filter(|(a1, a2, b1, b2)| a1 <= b1 && a2 >= b2)
+		.filter(|(a1, a2, b1, b2)| (a1 <= b1 && a2 >= b2) || (b1 <= a1 && b2 >= a2))
 		.count())
 }
 
