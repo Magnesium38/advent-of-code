@@ -33,19 +33,12 @@ impl Shipyard {
 	}
 
 	fn bulk_move_crates(&mut self, (amount, from, to): (usize, usize, usize)) {
-		let mut tmp = Vec::with_capacity(amount);
+		let crates = {
+			let len = self.stacks[from - 1].len();
+			self.stacks[from - 1].split_off(len - amount)
+		};
 
-		for _ in 0..amount {
-			if let Some(c) = self.stacks[from - 1].pop() {
-				tmp.push(c);
-			} else {
-				break;
-			}
-		}
-
-		tmp.reverse();
-
-		self.stacks[to - 1].extend(tmp);
+		self.stacks[to - 1].extend(crates);
 	}
 
 	fn read_message(self) -> String {
