@@ -66,7 +66,8 @@ macro_rules! main {
 			T1: std::fmt::Display,
 			T2: std::fmt::Display,
 		{
-			let input = input.trim();
+			let trimmable_characters: &[_] = &['\t', '\r', '\n'];
+			let input = input.trim_matches(trimmable_characters);
 			let now = std::time::Instant::now();
 
 			let pt1 = pt1(input);
