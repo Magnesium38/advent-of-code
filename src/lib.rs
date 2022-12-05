@@ -187,7 +187,8 @@ macro_rules! benchmark {
 				.map(|(pt1, pt2, day)| {
 					let input = std::fs::read_to_string(format!("input/{}.txt", day))
 						.unwrap_or_else(|_| "".to_string());
-					let input = input.trim();
+					let trimmable_characters: &[_] = &['\t', '\r', '\n'];
+					let input = input.trim_matches(trimmable_characters);
 
 					Ok((
 						day,
