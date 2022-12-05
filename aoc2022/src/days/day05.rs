@@ -56,41 +56,42 @@ impl Shipyard {
 	}
 }
 
-fn parse_moves(moves: &str) -> impl Iterator<Item = (usize, usize, usize)> + '_ {
-	moves
-		.lines()
-		.map(|line| {
-			line.split_ascii_whitespace()
-				.collect_tuple()
-				.expect("expected consistent input")
-		})
-		.map(|(_, amount, _, from, _, to)| {
-			(
-				amount.parse().expect("expected numeric input"),
-				from.parse().expect("expected numeric input"),
-				to.parse().expect("expected numeric input"),
-			)
-		})
-}
-
-pub fn pt1(input: &str) -> anyhow::Result<String> {
+fn parse_input(input: &str) -> (Shipyard, impl Iterator<Item = (usize, usize, usize)> + '_) {
 	let (initial, moves) = input
 		.split_once("\n\n")
 		.expect("expected double new line between sections");
-	let mut shipyard = Shipyard::new(initial);
 
-	parse_moves(moves).for_each(|input| shipyard.move_crate(input));
+	(
+		Shipyard::new(initial),
+		moves
+			.lines()
+			.map(|line| {
+				line.split_ascii_whitespace()
+					.collect_tuple()
+					.expect("expected consistent input")
+			})
+			.map(|(_, amount, _, from, _, to)| {
+				(
+					amount.parse().expect("expected numeric input"),
+					from.parse().expect("expected numeric input"),
+					to.parse().expect("expected numeric input"),
+				)
+			}),
+	)
+}
+
+pub fn pt1(input: &str) -> anyhow::Result<String> {
+	let (mut shipyard, moves) = parse_input(input);
+
+	moves.for_each(|input| shipyard.move_crate(input));
 
 	Ok(shipyard.read_message())
 }
 
 pub fn pt2(input: &str) -> anyhow::Result<String> {
-	let (initial, moves) = input
-		.split_once("\n\n")
-		.expect("expected double new line between sections");
-	let mut shipyard = Shipyard::new(initial);
+	let (mut shipyard, moves) = parse_input(input);
 
-	parse_moves(moves).for_each(|input| shipyard.bulk_move_crates(input));
+	moves.for_each(|input| shipyard.bulk_move_crates(input));
 
 	Ok(shipyard.read_message())
 }
