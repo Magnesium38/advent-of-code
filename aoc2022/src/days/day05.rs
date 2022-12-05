@@ -6,7 +6,11 @@ struct Shipyard {
 
 impl Shipyard {
 	fn new(input: &str) -> Self {
-		let mut stacks: Vec<_> = (0..input.lines().next().unwrap().len() / 4 + 1)
+		let mut stacks: Vec<_> = (0..input
+			.lines()
+			.next()
+			.expect("at least one line of input expected")
+			.len() / 4 + 1)
 			.map(|_| vec![])
 			.collect();
 
@@ -42,44 +46,51 @@ impl Shipyard {
 	}
 
 	fn read_message(self) -> String {
-		self.stacks.iter().map(|v| v.last().unwrap()).collect()
+		self.stacks
+			.iter()
+			.map(|v| {
+				v.last()
+					.expect("at least one element per stack was expected")
+			})
+			.collect()
 	}
 }
 
-pub fn pt1(input: &str) -> anyhow::Result<String> {
-	let (initial, moves) = input.split_once("\n\n").unwrap();
-	let mut shipyard = Shipyard::new(initial);
-
+fn parse_moves(moves: &str) -> impl Iterator<Item = (usize, usize, usize)> + '_ {
 	moves
 		.lines()
-		.map(|line| line.split_ascii_whitespace().collect_tuple().unwrap())
+		.map(|line| {
+			line.split_ascii_whitespace()
+				.collect_tuple()
+				.expect("expected consistent input")
+		})
 		.map(|(_, amount, _, from, _, to)| {
 			(
-				amount.parse().unwrap(),
-				from.parse().unwrap(),
-				to.parse().unwrap(),
+				amount.parse().expect("expected numeric input"),
+				from.parse().expect("expected numeric input"),
+				to.parse().expect("expected numeric input"),
 			)
 		})
-		.for_each(|input| shipyard.move_crate(input));
+}
+
+pub fn pt1(input: &str) -> anyhow::Result<String> {
+	let (initial, moves) = input
+		.split_once("\n\n")
+		.expect("expected double new line between sections");
+	let mut shipyard = Shipyard::new(initial);
+
+	parse_moves(moves).for_each(|input| shipyard.move_crate(input));
 
 	Ok(shipyard.read_message())
 }
 
 pub fn pt2(input: &str) -> anyhow::Result<String> {
-	let (initial, moves) = input.split_once("\n\n").unwrap();
+	let (initial, moves) = input
+		.split_once("\n\n")
+		.expect("expected double new line between sections");
 	let mut shipyard = Shipyard::new(initial);
 
-	moves
-		.lines()
-		.map(|line| line.split_ascii_whitespace().collect_tuple().unwrap())
-		.map(|(_, amount, _, from, _, to)| {
-			(
-				amount.parse().unwrap(),
-				from.parse().unwrap(),
-				to.parse().unwrap(),
-			)
-		})
-		.for_each(|input| shipyard.bulk_move_crates(input));
+	parse_moves(moves).for_each(|input| shipyard.bulk_move_crates(input));
 
 	Ok(shipyard.read_message())
 }
