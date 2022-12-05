@@ -6,12 +6,9 @@ struct Shipyard {
 
 impl Shipyard {
 	fn new(input: &str) -> Self {
-		let n = input.lines().next().unwrap().len() / 4 + 1;
-		let mut stacks = Vec::with_capacity(n);
-
-		for _ in 0..n {
-			stacks.push(vec![]);
-		}
+		let mut stacks: Vec<_> = (0..input.lines().next().unwrap().len() / 4 + 1)
+			.map(|_| vec![])
+			.collect();
 
 		input.lines().for_each(|line| {
 			line.chars()
