@@ -1,25 +1,23 @@
 use std::collections::HashSet;
 
-pub fn pt1(input: &str) -> anyhow::Result<usize> {
-	Ok(input
+use itertools::Itertools;
+
+fn find_marker(input: &str, window_size: usize) -> usize {
+	input
 		.as_bytes()
-		.windows(4)
+		.windows(window_size)
 		.map(|window| -> HashSet<_> { HashSet::from_iter(window) })
-		.enumerate()
-		.find(|(_, set)| set.len() == 4)
+		.find_position(|set| set.len() == window_size)
+		.map(|(position, _)| position + window_size)
 		.unwrap()
-		.0 + 4)
+}
+
+pub fn pt1(input: &str) -> anyhow::Result<usize> {
+	Ok(find_marker(input, 4))
 }
 
 pub fn pt2(input: &str) -> anyhow::Result<usize> {
-	Ok(input
-		.as_bytes()
-		.windows(14)
-		.map(|window| -> HashSet<_> { HashSet::from_iter(window) })
-		.enumerate()
-		.find(|(_, set)| set.len() == 14)
-		.unwrap()
-		.0 + 14)
+	Ok(find_marker(input, 14))
 }
 
 advent::problem!(
