@@ -27,3 +27,23 @@ advent::problem!(
 	7,
 	19,
 );
+
+#[cfg(test)]
+mod additional {
+	use super::*;
+
+	#[test]
+	fn cases() {
+		[
+			("bvwbjplbgvbhsrlpgdmjqwftvncz", 5, 23),
+			("nppdvjthqldpwncqszvftbrmjlhg", 6, 23),
+			("nznrnfrfntjfmvfwmzdfjlvtqnbhcprsg", 10, 29),
+			("zcfzfwzzqfrljwzlrfnpqdbhtmscgvjw", 11, 26),
+		]
+		.iter()
+		.for_each(|(input, pt1_result, pt2_result)| {
+			assert_eq!(&pt1(input).unwrap(), pt1_result);
+			assert_eq!(&pt2(input).unwrap(), pt2_result);
+		})
+	}
+}
