@@ -1,18 +1,14 @@
 use std::collections::HashSet;
 
-use itertools::Itertools;
-
 pub fn pt1(input: &str) -> anyhow::Result<usize> {
 	Ok(input
-		.chars()
+		.as_bytes()
+		.windows(4)
+		.map(|window| -> HashSet<_> { HashSet::from_iter(window) })
 		.enumerate()
-		.tuple_windows()
-		.map(|((i, a), (_, b), (_, c), (_, d))| -> (_, HashSet<_>) {
-			(i + 4, HashSet::from_iter([a, b, c, d]))
-		})
 		.find(|(_, set)| set.len() == 4)
 		.unwrap()
-		.0)
+		.0 + 4)
 }
 
 pub fn pt2(input: &str) -> anyhow::Result<usize> {
