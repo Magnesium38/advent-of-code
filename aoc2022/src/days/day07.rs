@@ -5,7 +5,7 @@ use std::path::PathBuf;
 #[derive(Debug, Clone)]
 struct Directory {
 	path: PathBuf,
-	files: HashMap<PathBuf, usize>,
+	files: Vec<usize>,
 	directories: Vec<PathBuf>,
 }
 
@@ -13,13 +13,13 @@ impl Directory {
 	fn new(path: PathBuf) -> Self {
 		Directory {
 			path,
-			files: HashMap::new(),
+			files: Vec::new(),
 			directories: Vec::new(),
 		}
 	}
 
 	fn get_size(&self, fs: &FileSystem) -> usize {
-		self.files.iter().map(|(_, size)| size).sum::<usize>()
+		self.files.iter().sum::<usize>()
 			+ self
 				.directories
 				.iter()
@@ -66,16 +66,13 @@ impl FileSystem {
 					.directories
 					.push(fs.working_directory.clone().join(&line[4..]));
 			} else {
-				let (size, file) = line.split_once(' ').unwrap();
+				let (size, _) = line.split_once(' ').unwrap();
 
 				fs.directories
 					.entry(fs.working_directory.clone())
 					.or_insert(Directory::new(fs.working_directory.clone()))
 					.files
-					.insert(
-						fs.working_directory.with_file_name(file),
-						size.parse().unwrap(),
-					);
+					.push(size.parse().unwrap());
 			}
 
 			fs
