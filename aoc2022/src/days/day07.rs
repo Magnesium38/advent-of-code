@@ -1,7 +1,6 @@
-use std::path::PathBuf;
-
 use hashbrown::HashMap;
 use itertools::Itertools;
+use std::path::PathBuf;
 
 #[derive(Debug, Clone)]
 struct Directory {
@@ -25,8 +24,6 @@ impl Directory {
 				.directories
 				.iter()
 				.map(|path| {
-					// dbg!(&path);
-
 					fs.directories
 						.get(&self.path.with_file_name(path))
 						.unwrap()
@@ -63,7 +60,6 @@ impl FileSystem {
 					fs.working_directory = fs.working_directory.join(&line[5..]);
 				}
 			} else if line.starts_with("dir") {
-				dbg!(&fs.working_directory.clone().join(&line[4..]));
 				fs.directories
 					.entry(fs.working_directory.clone())
 					.or_insert(Directory::new(fs.working_directory.clone()))
