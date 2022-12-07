@@ -49,22 +49,20 @@ impl FileSystem {
 			working_directory: PathBuf::new(),
 		}
 	}
-}
 
-pub fn pt1(input: &str) -> anyhow::Result<usize> {
-	let fs = input.lines().fold(FileSystem::new(), |mut fs, line| {
-		if line.starts_with('$') {
-			if line.starts_with("$ ls") {
-				// Nothing
-			} else if line == "$ cd .." {
-				fs.working_directory.pop();
-			} else if line == "$ cd /" {
-				fs.working_directory = PathBuf::from("/");
-			} else {
-				fs.working_directory = fs.working_directory.join(&line[5..]);
-			}
-		} else {
-			if line.starts_with("dir") {
+	fn from_input(input: &str) -> Self {
+		input.lines().fold(FileSystem::new(), |mut fs, line| {
+			if line.starts_with('$') {
+				if line.starts_with("$ ls") {
+					// Nothing
+				} else if line == "$ cd .." {
+					fs.working_directory.pop();
+				} else if line == "$ cd /" {
+					fs.working_directory = PathBuf::from("/");
+				} else {
+					fs.working_directory = fs.working_directory.join(&line[5..]);
+				}
+			} else if line.starts_with("dir") {
 				dbg!(&fs.working_directory.clone().join(&line[4..]));
 				fs.directories
 					.entry(fs.working_directory.clone())
@@ -83,12 +81,14 @@ pub fn pt1(input: &str) -> anyhow::Result<usize> {
 						size.parse().unwrap(),
 					);
 			}
-		}
 
-		fs
-	});
+			fs
+		})
+	}
+}
 
-	// dbg!(&fs.directories);
+pub fn pt1(input: &str) -> anyhow::Result<usize> {
+	let fs = FileSystem::from_input(input);
 
 	Ok(fs
 		.directories
@@ -99,41 +99,7 @@ pub fn pt1(input: &str) -> anyhow::Result<usize> {
 }
 
 pub fn pt2(input: &str) -> anyhow::Result<usize> {
-	let fs = input.lines().fold(FileSystem::new(), |mut fs, line| {
-		if line.starts_with('$') {
-			if line.starts_with("$ ls") {
-				// Nothing
-			} else if line == "$ cd .." {
-				fs.working_directory.pop();
-			} else if line == "$ cd /" {
-				fs.working_directory = PathBuf::from("/");
-			} else {
-				fs.working_directory = fs.working_directory.join(&line[5..]);
-			}
-		} else {
-			if line.starts_with("dir") {
-				dbg!(&fs.working_directory.clone().join(&line[4..]));
-				fs.directories
-					.entry(fs.working_directory.clone())
-					.or_insert(Directory::new(fs.working_directory.clone()))
-					.directories
-					.push(fs.working_directory.clone().join(&line[4..]));
-			} else {
-				let (size, file) = line.split_once(' ').unwrap();
-
-				fs.directories
-					.entry(fs.working_directory.clone())
-					.or_insert(Directory::new(fs.working_directory.clone()))
-					.files
-					.insert(
-						fs.working_directory.with_file_name(file),
-						size.parse().unwrap(),
-					);
-			}
-		}
-
-		fs
-	});
+	let fs = FileSystem::from_input(input);
 
 	let used_space = fs
 		.directories
@@ -148,8 +114,7 @@ pub fn pt2(input: &str) -> anyhow::Result<usize> {
 		.iter()
 		.map(|(_, directory)| directory.get_size(&fs))
 		.sorted()
-		.filter(|size| *size > minimum)
-		.next()
+		.find(|size| *size > minimum)
 		.unwrap())
 }
 
