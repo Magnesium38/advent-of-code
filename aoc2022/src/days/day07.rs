@@ -36,12 +36,12 @@ pub fn pt1(input: &str) -> anyhow::Result<usize> {
 
 pub fn pt2(input: &str) -> anyhow::Result<usize> {
 	let sizes = parse(&mut input.lines());
-	let minimum = 30000000
-		- (70000000
-			- sizes
-				.iter()
-				.max()
-				.expect("at least one element should exist"));
+	let minimum = sizes
+		.iter()
+		.max()
+		.expect("at least one element should exist")
+		+ 30000000
+		- 70000000;
 
 	Ok(sizes
 		.into_iter()
