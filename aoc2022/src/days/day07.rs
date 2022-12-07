@@ -10,13 +10,15 @@ fn parse<'a>(input: &mut impl Iterator<Item = &'a str>) -> Vec<usize> {
 			.map(|line| line.split(' ').collect_vec())
 			.as_deref()
 		{
-			Some(["$", "ls"]) | Some(["dir", _]) => {}
+			Some(["$", "ls"]) | Some(["dir", _]) => (),
 			Some(["$", "cd", ".."]) | None => break,
 			Some(["$", "cd", _]) => {
 				sizes.extend(parse(input));
-				total += sizes.last().unwrap();
+				total += sizes
+					.last()
+					.expect("at least one element should have been added");
 			}
-			Some([size, _]) => total += size.parse::<usize>().unwrap(),
+			Some([size, _]) => total += size.parse::<usize>().expect("size is numeric"),
 			_ => unreachable!(),
 		}
 	}
@@ -34,13 +36,18 @@ pub fn pt1(input: &str) -> anyhow::Result<usize> {
 
 pub fn pt2(input: &str) -> anyhow::Result<usize> {
 	let sizes = parse(&mut input.lines());
-	let minimum = 30000000 - (70000000 - sizes.iter().max().unwrap());
+	let minimum = 30000000
+		- (70000000
+			- sizes
+				.iter()
+				.max()
+				.expect("at least one element should exist"));
 
 	Ok(sizes
 		.into_iter()
 		.sorted()
 		.find(|size| *size > minimum)
-		.unwrap())
+		.expect("at least one element should have been found"))
 }
 
 advent::problem!(
