@@ -3,46 +3,47 @@ use hashbrown::HashSet;
 use itertools::FoldWhile::{self, Continue, Done};
 use itertools::Itertools;
 
+fn fold_visible_count(
+	grid: &Grid<u32>,
+	main_tree: u32,
+	visible: bool,
+	x: isize,
+	y: isize,
+) -> FoldWhile<bool> {
+	if visible
+		&& match grid.get(x, y) {
+			Some(&size) => main_tree > size,
+			None => true,
+		} {
+		Continue(true)
+	} else {
+		Done(false)
+	}
+}
+
 fn is_visible(grid: &Grid<u32>, (x, y): (isize, isize)) -> bool {
-	let tree = grid.get(x, y).unwrap();
+	let main_tree = *grid.get(x, y).unwrap();
 
-	if (0..x).fold(true, |visible, i| {
-		visible
-			&& match grid.get(i, y) {
-				Some(size) => tree > size,
-				None => true,
-			}
-	}) {
-		return true;
-	}
-
-	if (x + 1..grid.width.try_into().unwrap()).fold(true, |visible, i| {
-		visible
-			&& match grid.get(i, y) {
-				Some(size) => tree > size,
-				None => true,
-			}
-	}) {
-		return true;
-	}
-
-	if (0..y).fold(true, |visible, j| {
-		visible
-			&& match grid.get(x, j) {
-				Some(size) => tree > size,
-				None => true,
-			}
-	}) {
-		return true;
-	}
-
-	(y + 1..grid.height.try_into().unwrap()).fold(true, |visible, j| {
-		visible
-			&& match grid.get(x, j) {
-				Some(size) => tree > size,
-				None => true,
-			}
-	})
+	(0..x)
+		.fold_while(true, |visible, i| {
+			fold_visible_count(grid, main_tree, visible, i, y)
+		})
+		.into_inner()
+		|| (x + 1..grid.width.try_into().unwrap())
+			.fold_while(true, |visible, i| {
+				fold_visible_count(grid, main_tree, visible, i, y)
+			})
+			.into_inner()
+		|| (0..y)
+			.fold_while(true, |visible, j| {
+				fold_visible_count(grid, main_tree, visible, x, j)
+			})
+			.into_inner()
+		|| (y + 1..grid.height.try_into().unwrap())
+			.fold_while(true, |visible, j| {
+				fold_visible_count(grid, main_tree, visible, x, j)
+			})
+			.into_inner()
 }
 
 fn fold_direction(
