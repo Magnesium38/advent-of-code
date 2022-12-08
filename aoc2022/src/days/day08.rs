@@ -1,5 +1,4 @@
 use advent::Grid;
-use hashbrown::HashSet;
 use itertools::FoldWhile::{self, Continue, Done};
 use itertools::Itertools;
 
@@ -21,31 +20,6 @@ fn fold_visible_count(
 	}
 }
 
-fn is_visible(grid: &Grid<u32>, (x, y): (isize, isize)) -> bool {
-	let main_tree = *grid.get(x, y).unwrap();
-
-	(0..x)
-		.fold_while(true, |visible, i| {
-			fold_visible_count(grid, main_tree, visible, i, y)
-		})
-		.into_inner()
-		|| (x + 1..grid.width.try_into().unwrap())
-			.fold_while(true, |visible, i| {
-				fold_visible_count(grid, main_tree, visible, i, y)
-			})
-			.into_inner()
-		|| (0..y)
-			.fold_while(true, |visible, j| {
-				fold_visible_count(grid, main_tree, visible, x, j)
-			})
-			.into_inner()
-		|| (y + 1..grid.height.try_into().unwrap())
-			.fold_while(true, |visible, j| {
-				fold_visible_count(grid, main_tree, visible, x, j)
-			})
-			.into_inner()
-}
-
 fn fold_direction(
 	grid: &Grid<u32>,
 	main_tree: u32,
@@ -62,47 +36,32 @@ fn fold_direction(
 	}
 }
 
-fn count_visible(grid: &Grid<u32>, (x, y): (isize, isize)) -> usize {
-	let main_tree = *grid.get(x, y).unwrap();
-
-	(0..x)
-		.rev()
-		.fold_while((0, 0), |(tree, count), i| {
-			fold_direction(grid, main_tree, tree, count, i, y)
-		})
-		.into_inner()
-		.1 * (x + 1..grid.width.try_into().unwrap())
-		.fold_while((0, 0), |(tree, count), i| {
-			fold_direction(grid, main_tree, tree, count, i, y)
-		})
-		.into_inner()
-		.1 * (0..y)
-		.rev()
-		.fold_while((0, 0), |(tree, count), j| {
-			fold_direction(grid, main_tree, tree, count, x, j)
-		})
-		.into_inner()
-		.1 * (y + 1..grid.height.try_into().unwrap())
-		.fold_while((0, 0), |(tree, count), j| {
-			fold_direction(grid, main_tree, tree, count, x, j)
-		})
-		.into_inner()
-		.1
-}
-
 pub fn pt1(input: &str) -> anyhow::Result<usize> {
 	let grid = Grid::new(input);
-	let mut visible: HashSet<(usize, usize)> = HashSet::new();
 
-	for x in 0..grid.width {
-		for y in 0..grid.height {
-			if is_visible(&grid, (x.try_into()?, y.try_into()?)) {
-				visible.insert((x, y));
-			}
-		}
-	}
-
-	Ok(visible.len())
+	Ok(grid
+		.iter()
+		.map(|((x, y), &main_tree)| {
+			(0..x)
+				.fold_while(true, |visible, i| {
+					fold_visible_count(&grid, main_tree, visible, i, y)
+				})
+				.into_inner() || (x + 1..grid.width.try_into().unwrap())
+				.fold_while(true, |visible, i| {
+					fold_visible_count(&grid, main_tree, visible, i, y)
+				})
+				.into_inner() || (0..y)
+				.fold_while(true, |visible, j| {
+					fold_visible_count(&grid, main_tree, visible, x, j)
+				})
+				.into_inner() || (y + 1..grid.height.try_into().unwrap())
+				.fold_while(true, |visible, j| {
+					fold_visible_count(&grid, main_tree, visible, x, j)
+				})
+				.into_inner()
+		})
+		.filter(|&visible| visible)
+		.count())
 }
 
 pub fn pt2(input: &str) -> anyhow::Result<usize> {
@@ -110,7 +69,31 @@ pub fn pt2(input: &str) -> anyhow::Result<usize> {
 
 	Ok(grid
 		.iter()
-		.map(|((x, y), _)| count_visible(&grid, (x, y)))
+		.map(|((x, y), &main_tree)| {
+			(0..x)
+				.rev()
+				.fold_while((0, 0), |(tree, count), i| {
+					fold_direction(&grid, main_tree, tree, count, i, y)
+				})
+				.into_inner()
+				.1 * (x + 1..grid.width.try_into().unwrap())
+				.fold_while((0, 0), |(tree, count), i| {
+					fold_direction(&grid, main_tree, tree, count, i, y)
+				})
+				.into_inner()
+				.1 * (0..y)
+				.rev()
+				.fold_while((0, 0), |(tree, count), j| {
+					fold_direction(&grid, main_tree, tree, count, x, j)
+				})
+				.into_inner()
+				.1 * (y + 1..grid.height.try_into().unwrap())
+				.fold_while((0, 0), |(tree, count), j| {
+					fold_direction(&grid, main_tree, tree, count, x, j)
+				})
+				.into_inner()
+				.1
+		})
 		.max()
 		.unwrap())
 }
