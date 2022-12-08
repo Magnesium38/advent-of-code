@@ -1,4 +1,5 @@
 use itertools::Itertools;
+use std::ops::{Add, Sub};
 
 fn parse<'a>(input: &mut impl Iterator<Item = &'a str>) -> Vec<usize> {
 	let mut sizes = vec![];
@@ -40,8 +41,8 @@ pub fn pt2(input: &str) -> anyhow::Result<usize> {
 		.iter()
 		.max()
 		.expect("at least one element should exist")
-		+ 30000000
-		- 70000000;
+		.add(30000000)
+		.sub(70000000);
 
 	Ok(sizes
 		.into_iter()
