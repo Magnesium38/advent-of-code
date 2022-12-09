@@ -1,6 +1,6 @@
 use hashbrown::HashSet;
 
-fn actually_do_move(rope: &mut [(isize, isize)]) {
+fn move_tail(rope: &mut [(isize, isize)]) {
 	let (head, tail) = if let [head, tail] = rope {
 		(head, tail)
 	} else {
@@ -22,7 +22,7 @@ fn actually_do_move(rope: &mut [(isize, isize)]) {
 	};
 }
 
-fn do_move(
+fn move_head(
 	pair: &mut [(isize, isize)],
 	visited: &mut HashSet<(isize, isize)>,
 	direction: char,
@@ -41,7 +41,7 @@ fn do_move(
 		let tail_before = *pair.last().unwrap();
 
 		for i in 0..pair.len() - 1 {
-			actually_do_move(&mut pair[i..=i + 1]);
+			move_tail(&mut pair[i..=i + 1]);
 		}
 
 		let tail_after = *pair.last().unwrap();
@@ -51,10 +51,8 @@ fn do_move(
 	}
 }
 
-pub fn pt1(input: &str) -> anyhow::Result<usize> {
-	let mut rope = [(0, 0), (0, 0)];
-	let mut visited = HashSet::<(isize, isize)>::new();
-
+fn calculate_visited(input: &str, rope: &mut [(isize, isize)]) -> usize {
+	let mut visited = HashSet::new();
 	visited.insert(rope[0]);
 
 	input
@@ -62,38 +60,32 @@ pub fn pt1(input: &str) -> anyhow::Result<usize> {
 		.map(|line| line.split_once(' ').unwrap())
 		.map(|(direction, amount)| (direction.chars().next().unwrap(), amount.parse().unwrap()))
 		.for_each(|(direction, amount): (char, usize)| {
-			do_move(&mut rope, &mut visited, direction, amount);
+			move_head(rope, &mut visited, direction, amount);
 		});
 
-	Ok(visited.len())
+	visited.len()
+}
+
+pub fn pt1(input: &str) -> anyhow::Result<usize> {
+	Ok(calculate_visited(input, &mut [(0, 0), (0, 0)]))
 }
 
 pub fn pt2(input: &str) -> anyhow::Result<usize> {
-	let mut rope: [(isize, isize); 10] = [
-		(0, 0),
-		(0, 0),
-		(0, 0),
-		(0, 0),
-		(0, 0),
-		(0, 0),
-		(0, 0),
-		(0, 0),
-		(0, 0),
-		(0, 0),
-	];
-	let mut visited = HashSet::<(isize, isize)>::new();
-
-	visited.insert(rope[0]);
-
-	input
-		.lines()
-		.map(|line| line.split_once(' ').unwrap())
-		.map(|(direction, amount)| (direction.chars().next().unwrap(), amount.parse().unwrap()))
-		.for_each(|(direction, amount): (char, usize)| {
-			do_move(&mut rope, &mut visited, direction, amount);
-		});
-
-	Ok(visited.len())
+	Ok(calculate_visited(
+		input,
+		&mut [
+			(0, 0),
+			(0, 0),
+			(0, 0),
+			(0, 0),
+			(0, 0),
+			(0, 0),
+			(0, 0),
+			(0, 0),
+			(0, 0),
+			(0, 0),
+		],
+	))
 }
 
 advent::problem!(
