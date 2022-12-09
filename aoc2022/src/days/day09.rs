@@ -7,18 +7,11 @@ fn move_tail(rope: &mut [(isize, isize)]) {
 		unreachable!()
 	};
 
-	match ((head.0 - tail.0), (head.1 - tail.1)) {
-		(-1..=1, -1..=1) => (),
-		(dx, dy) => {
-			*tail = match (dx, dy) {
-				(-2, -1..=1) | (2, -1..=1) => (head.0 - dx.signum(), head.1),
-				(-1..=1, -2) | (-1..=1, 2) => (head.0, head.1 - dy.signum()),
-				(-2, -2) | (-2, 2) | (2, -2) | (2, 2) => {
-					(head.0 - dx.signum(), head.1 - dy.signum())
-				}
-				_ => unreachable!(),
-			};
-		}
+	*tail = match ((head.0 - tail.0), (head.1 - tail.1)) {
+		(-1..=1, -1..=1) => *tail,
+		(dx @ -2, -1..=1) | (dx @ 2, -1..=1) => (head.0 - dx.signum(), head.1),
+		(-1..=1, dy @ -2) | (-1..=1, dy @ 2) => (head.0, head.1 - dy.signum()),
+		(dx, dy) => (head.0 - dx.signum(), head.1 - dy.signum()),
 	};
 }
 
