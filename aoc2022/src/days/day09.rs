@@ -4,7 +4,7 @@ fn move_tail(rope: &mut [(isize, isize)]) {
 	let (head, tail) = if let [head, tail] = rope {
 		(head, tail)
 	} else {
-		unreachable!()
+		unreachable!("only a single tail can be moved at a time")
 	};
 
 	*tail = match ((head.0 - tail.0), (head.1 - tail.1)) {
@@ -26,18 +26,22 @@ fn move_head(
 		'D' => (0, -1),
 		'L' => (-1, 0),
 		'R' => (1, 0),
-		_ => unreachable!(),
+		_ => unreachable!("any other characters would be invalid input"),
 	};
 
 	for _ in 0..amount {
 		pair[0] = (pair[0].0 + delta.0, pair[0].1 + delta.1);
-		let tail_before = *pair.last().unwrap();
+		let tail_before = *pair
+			.last()
+			.expect("the pair should be at least two elements and thus should have a last");
 
 		for i in 0..pair.len() - 1 {
 			move_tail(&mut pair[i..=i + 1]);
 		}
 
-		let tail_after = *pair.last().unwrap();
+		let tail_after = *pair
+			.last()
+			.expect("the pair should be at least two elements and thus should have a last");
 		if tail_after != tail_before {
 			visited.insert(tail_after);
 		}
@@ -50,8 +54,19 @@ fn calculate_visited(input: &str, rope: &mut [(isize, isize)]) -> usize {
 
 	input
 		.lines()
-		.map(|line| line.split_once(' ').unwrap())
-		.map(|(direction, amount)| (direction.chars().next().unwrap(), amount.parse().unwrap()))
+		.map(|line| {
+			line.split_once(' ')
+				.expect("any other shape is invalid input")
+		})
+		.map(|(direction, amount)| {
+			(
+				direction
+					.chars()
+					.next()
+					.expect("expected the direction as a single character"),
+				amount.parse().expect("expected a numeric amount"),
+			)
+		})
 		.for_each(|(direction, amount): (char, usize)| {
 			move_head(rope, &mut visited, direction, amount);
 		});
