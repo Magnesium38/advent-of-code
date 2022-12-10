@@ -1,7 +1,5 @@
 use std::str::Lines;
 
-use itertools::Itertools;
-
 #[derive(Copy, Clone, Debug)]
 enum Instruction {
 	Noop,
@@ -72,7 +70,7 @@ pub fn pt1(input: &str) -> anyhow::Result<isize> {
 }
 
 fn draw(sprite: &mut [bool; 40], index: isize) {
-	if let Some(i) = <isize as TryInto<usize>>::try_into(index).ok() {
+	if let Ok(i) = usize::try_from(index) {
 		if (0..40).contains(&i) {
 			sprite[i] = true;
 		}
