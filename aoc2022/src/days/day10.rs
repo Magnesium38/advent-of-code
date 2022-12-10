@@ -47,6 +47,21 @@ impl<'a> InstructionSet<'a> {
 	}
 }
 
+fn draw(sprite: &mut [bool; 40], index: isize) {
+	if let Ok(i) = usize::try_from(index) {
+		if (0..40).contains(&i) {
+			sprite[i] = true;
+		}
+	}
+}
+
+fn draw_sprite(sprite: &mut [bool; 40], x: isize) {
+	*sprite = [false; 40];
+	draw(sprite, x - 1);
+	draw(sprite, x);
+	draw(sprite, x + 1);
+}
+
 pub fn pt1(input: &str) -> anyhow::Result<isize> {
 	let mut total: isize = 0;
 	let mut x: isize = 1;
@@ -63,21 +78,6 @@ pub fn pt1(input: &str) -> anyhow::Result<isize> {
 	}
 
 	Ok(total)
-}
-
-fn draw(sprite: &mut [bool; 40], index: isize) {
-	if let Ok(i) = usize::try_from(index) {
-		if (0..40).contains(&i) {
-			sprite[i] = true;
-		}
-	}
-}
-
-fn draw_sprite(sprite: &mut [bool; 40], x: isize) {
-	*sprite = [false; 40];
-	draw(sprite, x - 1);
-	draw(sprite, x);
-	draw(sprite, x + 1);
 }
 
 pub fn pt2(input: &str) -> anyhow::Result<String> {
