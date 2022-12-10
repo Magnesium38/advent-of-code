@@ -21,23 +21,19 @@ impl<'a> Iterator for InstructionSet<'a> {
 		if let Some(ins) = self.current_instruction {
 			self.current_instruction = None;
 
-			Some((self.count, ins))
+			Some(ins)
 		} else {
-			self.input.next().map(|line| {
-				(
-					self.count,
-					match line.chars().next() {
-						Some('a') => {
-							self.current_instruction =
-								Some(Instruction::Addx(line[5..].parse::<isize>().unwrap()));
-							Instruction::Noop
-						}
-						Some(_) => Instruction::Noop,
-						_ => unreachable!(),
-					},
-				)
+			self.input.next().map(|line| match line.chars().next() {
+				Some('a') => {
+					self.current_instruction =
+						Some(Instruction::Addx(line[5..].parse::<isize>().unwrap()));
+					Instruction::Noop
+				}
+				Some(_) => Instruction::Noop,
+				_ => unreachable!(),
 			})
 		}
+		.map(|ins| (self.count, ins))
 	}
 }
 
