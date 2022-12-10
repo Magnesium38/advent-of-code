@@ -73,19 +73,21 @@ fn draw(sprite: &mut [bool; 40], index: isize) {
 	}
 }
 
+fn draw_sprite(sprite: &mut [bool; 40], x: isize) {
+	*sprite = [false; 40];
+	draw(sprite, x - 1);
+	draw(sprite, x);
+	draw(sprite, x + 1);
+}
+
 pub fn pt2(input: &str) -> anyhow::Result<String> {
 	let mut s = String::new();
 	let mut sprite = [false; 40];
 	let mut x = 1_isize;
-	sprite[0] = true;
-	sprite[1] = true;
-	sprite[2] = true;
+	draw_sprite(&mut sprite, x);
 
 	for (cycle, instruction) in InstructionSet::new(input) {
-		sprite = [false; 40];
-		draw(&mut sprite, x - 1);
-		draw(&mut sprite, x);
-		draw(&mut sprite, x + 1);
+		draw_sprite(&mut sprite, x);
 
 		s.push(if sprite[(cycle - 1) % 40] { '#' } else { '.' });
 		if cycle % 40 == 0 {
