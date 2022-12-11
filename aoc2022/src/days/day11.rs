@@ -19,8 +19,7 @@ impl Monkey {
 			.nth(1)
 			.unwrap()
 			.split(':')
-			.skip(1)
-			.next()
+			.nth(1)
 			.unwrap()
 			.split(',')
 			.map(|s| s.trim().parse().unwrap())
@@ -47,12 +46,10 @@ impl Monkey {
 				} else {
 					x + x
 				}
+			} else if let Some(y) = rhs {
+				x * y
 			} else {
-				if let Some(y) = rhs {
-					x * y
-				} else {
-					x * x
-				}
+				x * x
 			}
 		};
 
@@ -154,7 +151,7 @@ pub fn pt2(input: &str) -> anyhow::Result<u128> {
 		.map(|monkey| Reverse(monkey.inspect_count))
 		.sorted()
 		.take(2)
-		.map(|count| u128::try_from(count.0).unwrap())
+		.map(|count| count.0)
 		.product())
 }
 
