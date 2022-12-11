@@ -5,7 +5,6 @@ use itertools::Itertools;
 struct Monkey {
 	items: Vec<u128>,
 	operation: Box<dyn Fn(u128) -> u128>,
-	test: Box<dyn Fn(u128) -> bool>,
 	destinations: (usize, usize),
 	inspect_count: u128,
 	test_divisor: u128,
@@ -75,7 +74,6 @@ impl Monkey {
 		Monkey {
 			items: starting_items,
 			operation: Box::new(operator),
-			test: Box::new(move |x| x % test == 0),
 			destinations: (if_true, if_false),
 			inspect_count: 0,
 			test_divisor: test,
@@ -97,7 +95,7 @@ pub fn pt1(input: &str) -> anyhow::Result<u128> {
 				let worry = (monkeys[i].operation)(item) / 3;
 				let destinations = monkeys[i].destinations;
 
-				if (monkeys[i].test)(worry) {
+				if worry % monkeys[i].test_divisor == 0 {
 					monkeys[destinations.0].items.push(worry);
 				} else {
 					monkeys[destinations.1].items.push(worry);
@@ -130,7 +128,7 @@ pub fn pt2(input: &str) -> anyhow::Result<u128> {
 				let worry = (monkeys[i].operation)(item);
 				let destinations = monkeys[i].destinations;
 
-				if (monkeys[i].test)(worry) {
+				if worry % monkeys[i].test_divisor == 0 {
 					monkeys[destinations.0].items.push(worry % common_divisor);
 				} else {
 					monkeys[destinations.1].items.push(worry % common_divisor);
