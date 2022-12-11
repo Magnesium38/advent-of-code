@@ -3,11 +3,11 @@ use std::cmp::Reverse;
 use itertools::Itertools;
 
 struct Monkey {
-	items: Vec<u128>,
-	operation: Box<dyn Fn(u128) -> u128>,
+	items: Vec<usize>,
+	operation: Box<dyn Fn(usize) -> usize>,
 	destinations: (usize, usize),
-	inspect_count: u128,
-	test_divisor: u128,
+	inspect_count: usize,
+	test_divisor: usize,
 }
 
 impl Monkey {
@@ -25,7 +25,7 @@ impl Monkey {
 			.collect_vec();
 
 		let operation = lines.next().unwrap();
-		let rhs: Option<u128> = if operation.ends_with('d') {
+		let rhs: Option<usize> = if operation.ends_with('d') {
 			None
 		} else {
 			Some(
@@ -45,7 +45,7 @@ impl Monkey {
 			(false, None) => x * x,
 		};
 
-		let test: u128 = lines
+		let test: usize = lines
 			.next()
 			.unwrap()
 			.split_whitespace()
@@ -81,7 +81,7 @@ impl Monkey {
 	}
 }
 
-pub fn pt1(input: &str) -> anyhow::Result<u128> {
+pub fn pt1(input: &str) -> anyhow::Result<usize> {
 	let mut monkeys = input.split("\n\n").map(Monkey::new).collect_vec();
 
 	for _ in 0..20 {
@@ -89,7 +89,7 @@ pub fn pt1(input: &str) -> anyhow::Result<u128> {
 			let len = monkeys[i].items.len();
 			let items = monkeys[i].items.drain(0..len).collect_vec();
 
-			monkeys[i].inspect_count += items.len() as u128;
+			monkeys[i].inspect_count += items.len();
 
 			for item in items {
 				let worry = (monkeys[i].operation)(item) / 3;
@@ -113,16 +113,16 @@ pub fn pt1(input: &str) -> anyhow::Result<u128> {
 		.product())
 }
 
-pub fn pt2(input: &str) -> anyhow::Result<u128> {
+pub fn pt2(input: &str) -> anyhow::Result<usize> {
 	let mut monkeys = input.split("\n\n").map(Monkey::new).collect_vec();
-	let common_divisor: u128 = monkeys.iter().map(|monkey| monkey.test_divisor).product();
+	let common_divisor: usize = monkeys.iter().map(|monkey| monkey.test_divisor).product();
 
 	for _ in 0..10000 {
 		for i in 0..monkeys.len() {
 			let len = monkeys[i].items.len();
 			let items = monkeys[i].items.drain(0..len).collect_vec();
 
-			monkeys[i].inspect_count += items.len() as u128;
+			monkeys[i].inspect_count += items.len();
 
 			for item in items {
 				let worry = (monkeys[i].operation)(item);
