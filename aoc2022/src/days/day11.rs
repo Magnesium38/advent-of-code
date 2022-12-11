@@ -39,18 +39,11 @@ impl Monkey {
 			)
 		};
 		let is_addition = operation.contains('+');
-		let operator = move |x| {
-			if is_addition {
-				if let Some(y) = rhs {
-					x + y
-				} else {
-					x + x
-				}
-			} else if let Some(y) = rhs {
-				x * y
-			} else {
-				x * x
-			}
+		let operator = move |x| match (is_addition, rhs) {
+			(true, Some(y)) => x + y,
+			(true, None) => x + x,
+			(false, Some(y)) => x * y,
+			(false, None) => x * x,
 		};
 
 		let test: u128 = lines
