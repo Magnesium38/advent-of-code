@@ -1,15 +1,193 @@
-pub fn pt1(_input: &str) -> anyhow::Result<isize> {
-	Ok(0)
+use std::cmp::Reverse;
+
+use itertools::Itertools;
+
+struct Monkey {
+	items: Vec<u128>,
+	operation: Box<dyn Fn(u128) -> u128>,
+	test: Box<dyn Fn(u128) -> bool>,
+	destinations: (usize, usize),
+	inspect_count: u128,
+	test_divisor: u128,
 }
 
-pub fn pt2(_input: &str) -> anyhow::Result<isize> {
-	Ok(0)
+impl Monkey {
+	fn new(input: &str) -> Self {
+		let mut lines = input.lines();
+
+		let starting_items = lines
+			.nth(1)
+			.unwrap()
+			.split(':')
+			.skip(1)
+			.next()
+			.unwrap()
+			.split(',')
+			.map(|s| s.trim().parse().unwrap())
+			.collect_vec();
+
+		let operation = lines.next().unwrap();
+		let rhs: Option<u128> = if operation.ends_with('d') {
+			None
+		} else {
+			Some(
+				operation
+					.split_whitespace()
+					.last()
+					.unwrap()
+					.parse()
+					.unwrap(),
+			)
+		};
+		let is_addition = operation.contains('+');
+		let operator = move |x| {
+			if is_addition {
+				if let Some(y) = rhs {
+					x + y
+				} else {
+					x + x
+				}
+			} else {
+				if let Some(y) = rhs {
+					x * y
+				} else {
+					x * x
+				}
+			}
+		};
+
+		let test: u128 = lines
+			.next()
+			.unwrap()
+			.split_whitespace()
+			.last()
+			.unwrap()
+			.parse()
+			.unwrap();
+
+		let if_true = lines
+			.next()
+			.unwrap()
+			.split_whitespace()
+			.last()
+			.unwrap()
+			.parse()
+			.unwrap();
+		let if_false = lines
+			.next()
+			.unwrap()
+			.split_whitespace()
+			.last()
+			.unwrap()
+			.parse()
+			.unwrap();
+
+		Monkey {
+			items: starting_items,
+			operation: Box::new(operator),
+			test: Box::new(move |x| x % test == 0),
+			destinations: (if_true, if_false),
+			inspect_count: 0,
+			test_divisor: test,
+		}
+	}
 }
 
+pub fn pt1(input: &str) -> anyhow::Result<u128> {
+	let mut monkeys = input.split("\n\n").map(Monkey::new).collect_vec();
+
+	for _ in 0..20 {
+		for i in 0..monkeys.len() {
+			let len = monkeys[i].items.len();
+			let items = monkeys[i].items.drain(0..len).collect_vec();
+
+			monkeys[i].inspect_count += items.len() as u128;
+
+			for item in items {
+				let worry = (monkeys[i].operation)(item) / 3;
+				let destinations = monkeys[i].destinations;
+
+				if (monkeys[i].test)(worry) {
+					monkeys[destinations.0].items.push(worry);
+				} else {
+					monkeys[destinations.1].items.push(worry);
+				}
+			}
+		}
+	}
+
+	Ok(monkeys
+		.into_iter()
+		.map(|monkey| Reverse(monkey.inspect_count))
+		.sorted()
+		.take(2)
+		.map(|count| count.0)
+		.product())
+}
+
+pub fn pt2(input: &str) -> anyhow::Result<u128> {
+	let mut monkeys = input.split("\n\n").map(Monkey::new).collect_vec();
+	let common_divisor: u128 = monkeys.iter().map(|monkey| monkey.test_divisor).product();
+
+	for _ in 0..10000 {
+		for i in 0..monkeys.len() {
+			let len = monkeys[i].items.len();
+			let items = monkeys[i].items.drain(0..len).collect_vec();
+
+			monkeys[i].inspect_count += items.len() as u128;
+
+			for item in items {
+				let worry = (monkeys[i].operation)(item);
+				let destinations = monkeys[i].destinations;
+
+				if (monkeys[i].test)(worry) {
+					monkeys[destinations.0].items.push(worry % common_divisor);
+				} else {
+					monkeys[destinations.1].items.push(worry % common_divisor);
+				}
+			}
+		}
+	}
+
+	Ok(monkeys
+		.into_iter()
+		.map(|monkey| Reverse(monkey.inspect_count))
+		.sorted()
+		.take(2)
+		.map(|count| u128::try_from(count.0).unwrap())
+		.product())
+}
 
 advent::problem!(
 	r#"
+		Monkey 0:
+		  Starting items: 79, 98
+		  Operation: new = old * 19
+		  Test: divisible by 23
+			If true: throw to monkey 2
+			If false: throw to monkey 3
+
+		Monkey 1:
+		  Starting items: 54, 65, 75, 74
+		  Operation: new = old + 6
+		  Test: divisible by 19
+			If true: throw to monkey 2
+			If false: throw to monkey 0
+
+		Monkey 2:
+		  Starting items: 79, 60, 97
+		  Operation: new = old * old
+		  Test: divisible by 13
+			If true: throw to monkey 1
+			If false: throw to monkey 3
+
+		Monkey 3:
+		  Starting items: 74
+		  Operation: new = old + 3
+		  Test: divisible by 17
+			If true: throw to monkey 0
+			If false: throw to monkey 1
     "#,
-	0,
-	0,
+	10605,
+	2713310158,
 );
