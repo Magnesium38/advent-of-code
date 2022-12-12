@@ -51,7 +51,7 @@ pub fn pt1(input: &str) -> anyhow::Result<usize> {
 	let grid = Grid::from(input.lines().map(|line| {
 		line.as_bytes().iter().map(|c| match c {
 			b'E' => Node::End((b'z' - b'a') as usize),
-			b'S' => Node::Start((b'a' - b'a') as usize),
+			b'S' => Node::Start(0),
 			_ => Node::Regular((c - b'a') as usize),
 		})
 	}));
@@ -69,7 +69,7 @@ pub fn pt2(input: &str) -> anyhow::Result<usize> {
 	let grid = Grid::from(input.lines().map(|line| {
 		line.as_bytes().iter().map(|c| match c {
 			b'E' => Node::End((b'z' - b'a') as usize),
-			b'S' => Node::Start((b'a' - b'a') as usize),
+			b'S' => Node::Start(0),
 			_ => Node::Regular((c - b'a') as usize),
 		})
 	}));
@@ -81,7 +81,7 @@ pub fn pt2(input: &str) -> anyhow::Result<usize> {
 		})
 		.map(|(start, _)| find_lowest_steps(&grid, start))
 		.min()
-		.ok_or(anyhow!("no elements found"))
+		.ok_or_else(|| anyhow!("no elements found"))
 }
 
 advent::problem!(
