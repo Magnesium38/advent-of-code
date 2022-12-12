@@ -56,13 +56,13 @@ pub fn pt1(input: &str) -> anyhow::Result<usize> {
 		})
 	}));
 
-	let start = grid
-		.iter()
-		.find(|(_, node)| matches!(node, Node::Start(_)))
-		.unwrap()
-		.0;
-
-	Ok(find_lowest_steps(&grid, start))
+	Ok(find_lowest_steps(
+		&grid,
+		grid.iter()
+			.find(|(_, node)| matches!(node, Node::Start(_)))
+			.unwrap()
+			.0,
+	))
 }
 
 pub fn pt2(input: &str) -> anyhow::Result<usize> {
