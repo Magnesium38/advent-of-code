@@ -4,7 +4,6 @@ use nom::{
 	multi::separated_list0, sequence::delimited, IResult,
 };
 use std::cmp::Ordering;
-use std::fmt::{Display, Error, Formatter};
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 enum Packet {
@@ -40,27 +39,6 @@ impl PartialOrd<Packet> for Packet {
 impl Ord for Packet {
 	fn cmp(&self, other: &Self) -> Ordering {
 		self.partial_cmp(other).unwrap()
-	}
-}
-
-impl Display for Packet {
-	fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {
-		match self {
-			Self::Integer(n) => write!(f, "{n}"),
-			Self::List(list) => {
-				write!(f, "[")?;
-
-				for (i, p) in list.iter().enumerate() {
-					write!(f, "{p}")?;
-
-					if i != list.len() - 1 {
-						write!(f, ",")?;
-					}
-				}
-
-				write!(f, "]")
-			}
-		}
 	}
 }
 
