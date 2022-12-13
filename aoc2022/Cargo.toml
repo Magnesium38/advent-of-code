@@ -13,3 +13,4 @@ advent = { path = "../" }
 hashbrown = "0.11.2"
 itertools = "0.10.1"
 prettytable-rs = "0.8.0"
+nom = "7.1.1"
