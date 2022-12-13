@@ -5,7 +5,7 @@ use nom::{
 };
 use std::cmp::Ordering;
 
-#[derive(Debug, PartialEq, Eq, Clone)]
+#[derive(Debug, PartialEq, Eq)]
 enum Packet {
 	List(Vec<Packet>),
 	Integer(u8),
@@ -62,16 +62,14 @@ pub fn pt1(input: &str) -> anyhow::Result<usize> {
 }
 
 pub fn pt2(input: &str) -> anyhow::Result<usize> {
-	let divider_packets = [Packet::new("[[2]]"), Packet::new("[[6]]")];
-
 	Ok(input
 		.split("\n\n")
 		.map(|pair| pair.split_once('\n').expect("expected two lines"))
 		.flat_map(|(first, second)| [Packet::new(first), Packet::new(second)])
-		.interleave(divider_packets.clone())
+		.interleave([Packet::Integer(2), Packet::Integer(6)])
 		.sorted()
 		.enumerate()
-		.filter(|(_, packet)| divider_packets.contains(packet))
+		.filter(|(_, packet)| [Packet::Integer(2), Packet::Integer(6)].contains(packet))
 		.map(|(i, _)| i + 1)
 		.product())
 }
