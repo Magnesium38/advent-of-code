@@ -11,6 +11,12 @@ enum Packet {
 	Integer(u8),
 }
 
+impl Packet {
+	fn new(input: &str) -> Self {
+		parse_packet(input).expect("failed to parse packet").1
+	}
+}
+
 fn parse_packet(input: &str) -> IResult<&str, Packet> {
 	alt((
 		map(u8, Packet::Integer),
@@ -47,8 +53,8 @@ impl Ord for Packet {
 pub fn pt1(input: &str) -> anyhow::Result<usize> {
 	Ok(input
 		.split("\n\n")
-		.map(|pair| pair.split_once('\n').unwrap())
-		.map(|(first, second)| parse_packet(first).unwrap() <= parse_packet(second).unwrap())
+		.map(|pair| pair.split_once('\n').expect("expected two lines"))
+		.map(|(first, second)| Packet::new(first) <= Packet::new(second))
 		.enumerate()
 		.filter(|(_, result)| *result)
 		.map(|(i, _)| i + 1)
@@ -56,16 +62,12 @@ pub fn pt1(input: &str) -> anyhow::Result<usize> {
 }
 
 pub fn pt2(input: &str) -> anyhow::Result<usize> {
-	let divider_packets = [
-		parse_packet("[[2]]").unwrap().1,
-		parse_packet("[[6]]").unwrap().1,
-	];
+	let divider_packets = [Packet::new("[[2]]"), Packet::new("[[6]]")];
 
 	Ok(input
 		.split("\n\n")
-		.map(|pair| pair.split_once('\n').unwrap())
-		.flat_map(|(first, second)| [parse_packet(first).unwrap(), parse_packet(second).unwrap()])
-		.map(|(_, packet)| packet)
+		.map(|pair| pair.split_once('\n').expect("expected two lines"))
+		.flat_map(|(first, second)| [Packet::new(first), Packet::new(second)])
 		.interleave(divider_packets.clone())
 		.sorted()
 		.enumerate()
