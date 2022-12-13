@@ -14,10 +14,10 @@ enum Packet {
 
 fn parse_packet(input: &str) -> IResult<&str, Packet> {
 	alt((
-		map(u8, |v| Packet::Integer(v)),
+		map(u8, Packet::Integer),
 		map(
 			delimited(tag("["), separated_list0(tag(","), parse_packet), tag("]")),
-			|v| Packet::List(v),
+			Packet::List,
 		),
 	))(input)
 }
