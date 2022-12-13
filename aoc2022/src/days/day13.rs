@@ -23,22 +23,22 @@ fn parse_packet(input: &str) -> IResult<&str, Packet> {
 
 impl PartialOrd<Packet> for Packet {
 	fn partial_cmp(&self, other: &Packet) -> Option<Ordering> {
-		match (self, other) {
-			(Packet::List(lhs), Packet::List(rhs)) => lhs.partial_cmp(rhs),
-			(Packet::Integer(lhs), Packet::Integer(rhs)) => lhs.partial_cmp(rhs),
-			(Packet::List(_), Packet::Integer(rhs)) => {
-				self.partial_cmp(&Packet::List(vec![Packet::Integer(*rhs)]))
-			}
-			(Packet::Integer(lhs), Packet::List(_)) => {
-				Packet::List(vec![Packet::Integer(*lhs)]).partial_cmp(other)
-			}
-		}
+		Some(self.cmp(other))
 	}
 }
 
 impl Ord for Packet {
 	fn cmp(&self, other: &Self) -> Ordering {
-		self.partial_cmp(other).unwrap()
+		match (self, other) {
+			(Packet::List(lhs), Packet::List(rhs)) => lhs.cmp(rhs),
+			(Packet::Integer(lhs), Packet::Integer(rhs)) => lhs.cmp(rhs),
+			(Packet::List(_), Packet::Integer(rhs)) => {
+				self.cmp(&Packet::List(vec![Packet::Integer(*rhs)]))
+			}
+			(Packet::Integer(lhs), Packet::List(_)) => {
+				Packet::List(vec![Packet::Integer(*lhs)]).cmp(other)
+			}
+		}
 	}
 }
 
