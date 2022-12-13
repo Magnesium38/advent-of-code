@@ -27,17 +27,19 @@ impl PartialOrd<Packet> for Packet {
 	}
 }
 
+impl From<u8> for Packet {
+	fn from(n: u8) -> Self {
+		Packet::List(vec![Packet::Integer(n)])
+	}
+}
+
 impl Ord for Packet {
 	fn cmp(&self, other: &Self) -> Ordering {
 		match (self, other) {
 			(Packet::List(lhs), Packet::List(rhs)) => lhs.cmp(rhs),
 			(Packet::Integer(lhs), Packet::Integer(rhs)) => lhs.cmp(rhs),
-			(Packet::List(_), Packet::Integer(rhs)) => {
-				self.cmp(&Packet::List(vec![Packet::Integer(*rhs)]))
-			}
-			(Packet::Integer(lhs), Packet::List(_)) => {
-				Packet::List(vec![Packet::Integer(*lhs)]).cmp(other)
-			}
+			(Packet::List(_), Packet::Integer(rhs)) => self.cmp(&Packet::from(*rhs)),
+			(Packet::Integer(lhs), Packet::List(_)) => Packet::from(*lhs).cmp(other),
 		}
 	}
 }
