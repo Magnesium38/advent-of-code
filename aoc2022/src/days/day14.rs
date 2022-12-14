@@ -61,15 +61,15 @@ fn drop_sand(
 	for y in coords.y..=max_y {
 		coords.y = y;
 
-		if let Some(_) = grid.get(&coords) {
+		if grid.get(&coords).is_some() {
 			if coords.y == 0 {
 				return None;
 			}
 
 			coords.x -= 1;
-			if let Some(_) = grid.get(&coords) {
+			if grid.get(&coords).is_some() {
 				coords.x += 2;
-				if let Some(_) = grid.get(&coords) {
+				if grid.get(&coords).is_some() {
 					coords.x -= 1;
 					coords.y -= 1;
 
