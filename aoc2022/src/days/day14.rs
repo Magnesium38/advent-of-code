@@ -32,7 +32,6 @@ enum Node {
 
 fn parse_grid(input: &str) -> (HashMap<Coordinate, Node>, usize) {
 	let mut grid = HashMap::new();
-
 	let mut max_y = 0;
 
 	input.lines().for_each(|line| {
@@ -50,7 +49,7 @@ fn parse_grid(input: &str) -> (HashMap<Coordinate, Node>, usize) {
 			});
 	});
 
-	(grid, max_y)
+	(grid, max_y + 2)
 }
 
 fn drop_sand(
@@ -86,39 +85,32 @@ fn drop_sand(
 	None
 }
 
+fn fill_grid(grid: &mut HashMap<Coordinate, Node>, max_y: usize) -> usize {
+	loop {
+		if matches!(drop_sand(grid, max_y, Coordinate::new(500, 0)), None) {
+			break;
+		}
+	}
+
+	grid.values()
+		.filter(|node| matches!(node, Node::Sand))
+		.count()
+}
+
 pub fn pt1(input: &str) -> anyhow::Result<usize> {
 	let (mut grid, max_y) = parse_grid(input);
 
-	loop {
-		if matches!(drop_sand(&mut grid, max_y, Coordinate::new(500, 0)), None) {
-			break;
-		}
-	}
-
-	Ok(grid
-		.values()
-		.filter(|node| matches!(node, Node::Sand))
-		.count())
+	Ok(fill_grid(&mut grid, max_y))
 }
 
 pub fn pt2(input: &str) -> anyhow::Result<usize> {
-	let (mut grid, mut max_y) = parse_grid(input);
-	max_y += 2;
+	let (mut grid, max_y) = parse_grid(input);
 
-	for x in (500 - (2 * max_y))..=(500 + 2 * max_y) {
+	for x in (500 - max_y)..=(500 + max_y) {
 		grid.insert(Coordinate::new(x, max_y), Node::Rock);
 	}
 
-	loop {
-		if matches!(drop_sand(&mut grid, max_y, Coordinate::new(500, 0)), None) {
-			break;
-		}
-	}
-
-	Ok(grid
-		.values()
-		.filter(|node| matches!(node, Node::Sand))
-		.count())
+	Ok(fill_grid(&mut grid, max_y))
 }
 
 advent::problem!(
